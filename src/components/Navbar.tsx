@@ -1,9 +1,13 @@
-import { useState } from "react";
+ import { useState } from "react";
+ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Leaf } from "lucide-react";
+ import { Menu, X, Leaf, LogOut, Tractor, ShoppingBag } from "lucide-react";
+ import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+   const { user, userRole, signOut } = useAuth();
+   const navigate = useNavigate();
 
   const navLinks = [
     { label: "Features", href: "#features" },
@@ -12,19 +16,24 @@ const Navbar = () => {
     { label: "Impact", href: "#impact" },
   ];
 
+   const handleSignOut = async () => {
+     await signOut();
+     navigate("/");
+   };
+ 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 group">
+           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-soft group-hover:shadow-glow transition-shadow duration-300">
               <Leaf className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold text-foreground">
               Agri<span className="text-primary">Link</span>
             </span>
-          </a>
+           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -41,8 +50,33 @@ const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost">Log In</Button>
-            <Button variant="default">Get Started</Button>
+             {user ? (
+               <>
+                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
+                   {userRole === "farmer" ? (
+                     <Tractor className="w-4 h-4 text-primary" />
+                   ) : (
+                     <ShoppingBag className="w-4 h-4 text-secondary" />
+                   )}
+                   <span className="text-sm font-medium text-foreground capitalize">
+                     {userRole || "User"}
+                   </span>
+                 </div>
+                 <Button variant="ghost" onClick={handleSignOut}>
+                   <LogOut className="w-4 h-4 mr-2" />
+                   Log Out
+                 </Button>
+               </>
+             ) : (
+               <>
+                 <Button variant="ghost" asChild>
+                   <Link to="/login">Log In</Link>
+                 </Button>
+                 <Button variant="default" asChild>
+                   <Link to="/signup">Get Started</Link>
+                 </Button>
+               </>
+             )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -70,8 +104,33 @@ const Navbar = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-4 px-4 border-t border-border mt-2">
-                <Button variant="ghost" className="w-full justify-center">Log In</Button>
-                <Button variant="default" className="w-full justify-center">Get Started</Button>
+                 {user ? (
+                   <>
+                     <div className="flex items-center justify-center gap-2 py-2">
+                       {userRole === "farmer" ? (
+                         <Tractor className="w-4 h-4 text-primary" />
+                       ) : (
+                         <ShoppingBag className="w-4 h-4 text-secondary" />
+                       )}
+                       <span className="text-sm font-medium text-foreground capitalize">
+                         {userRole || "User"}
+                       </span>
+                     </div>
+                     <Button variant="ghost" className="w-full justify-center" onClick={handleSignOut}>
+                       <LogOut className="w-4 h-4 mr-2" />
+                       Log Out
+                     </Button>
+                   </>
+                 ) : (
+                   <>
+                     <Button variant="ghost" className="w-full justify-center" asChild>
+                       <Link to="/login">Log In</Link>
+                     </Button>
+                     <Button variant="default" className="w-full justify-center" asChild>
+                       <Link to="/signup">Get Started</Link>
+                     </Button>
+                   </>
+                 )}
               </div>
             </div>
           </div>
