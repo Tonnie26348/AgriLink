@@ -1,4 +1,4 @@
- import { useState } from "react";
+import { useState, useEffect } from "react";
  import { useNavigate, Link } from "react-router-dom";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -16,10 +16,18 @@
    const [fullName, setFullName] = useState("");
    const [role, setRole] = useState<AppRole | null>(null);
    const [isLoading, setIsLoading] = useState(false);
-   const { signUp } = useAuth();
+  const { signUp, userRole } = useAuth();
    const navigate = useNavigate();
    const { toast } = useToast();
  
+  // Redirect after successful signup and role assignment (for auto-confirm)
+  useEffect(() => {
+    if (userRole) {
+      const redirectPath = userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard";
+      navigate(redirectPath);
+    }
+  }, [userRole, navigate]);
+
    const handleSubmit = async (e: React.FormEvent) => {
      e.preventDefault();
      
