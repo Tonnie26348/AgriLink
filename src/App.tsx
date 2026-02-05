@@ -8,6 +8,9 @@
  import Login from "./pages/Login";
  import Signup from "./pages/Signup";
  import NotFound from "./pages/NotFound";
+ import ProtectedRoute from "@/components/ProtectedRoute";
+ import FarmerDashboard from "@/pages/farmer/FarmerDashboard";
+ import BuyerDashboard from "@/pages/buyer/BuyerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +25,22 @@ const App = () => (
              <Route path="/" element={<Index />} />
              <Route path="/login" element={<Login />} />
              <Route path="/signup" element={<Signup />} />
+             <Route
+               path="/farmer/dashboard"
+               element={
+                 <ProtectedRoute allowedRoles={["farmer"]}>
+                   <FarmerDashboard />
+                 </ProtectedRoute>
+               }
+             />
+             <Route
+               path="/buyer/dashboard"
+               element={
+                 <ProtectedRoute allowedRoles={["buyer"]}>
+                   <BuyerDashboard />
+                 </ProtectedRoute>
+               }
+             />
              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
              <Route path="*" element={<NotFound />} />
            </Routes>

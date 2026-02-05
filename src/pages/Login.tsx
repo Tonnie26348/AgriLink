@@ -1,4 +1,4 @@
- import { useState } from "react";
+import { useState, useEffect } from "react";
  import { useNavigate, Link } from "react-router-dom";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -11,10 +11,18 @@
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
    const [isLoading, setIsLoading] = useState(false);
-   const { signIn } = useAuth();
+  const { signIn, userRole } = useAuth();
    const navigate = useNavigate();
    const { toast } = useToast();
  
+  // Redirect after successful login based on role
+  useEffect(() => {
+    if (userRole) {
+      const redirectPath = userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard";
+      navigate(redirectPath);
+    }
+  }, [userRole, navigate]);
+
    const handleSubmit = async (e: React.FormEvent) => {
      e.preventDefault();
      setIsLoading(true);
@@ -32,7 +40,7 @@
          title: "Welcome back!",
          description: "You have successfully logged in.",
        });
-       navigate("/");
+      // Navigation handled by useEffect watching userRole
      }
  
      setIsLoading(false);
