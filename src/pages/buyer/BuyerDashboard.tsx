@@ -122,13 +122,18 @@
  
          {/* Main Content Grid */}
          <div className="grid lg:grid-cols-3 gap-6">
-           {/* Featured Produce */}
-           <div className="lg:col-span-2">
-             <Card>
-               <CardHeader>
-                 <CardTitle>Featured Produce</CardTitle>
-                 <CardDescription>Fresh picks from trusted farmers</CardDescription>
-               </CardHeader>
+            {/* Featured Produce */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Featured Produce</CardTitle>
+                    <CardDescription>Fresh picks from trusted farmers</CardDescription>
+                  </div>
+                  <Link to="/marketplace">
+                    <Button variant="outline">View All</Button>
+                  </Link>
+                </CardHeader>
                <CardContent>
                  <div className="grid sm:grid-cols-2 gap-4">
                    {featuredProduce.map((item) => (
