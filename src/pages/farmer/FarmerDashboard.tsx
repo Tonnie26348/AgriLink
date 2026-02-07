@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProduceListings, ProduceListing, CreateListingInput } from "@/hooks/useProduceListings";
+import { useOrders } from "@/hooks/useOrders";
+import OrderCard from "@/components/orders/OrderCard";
 import ProduceListingDialog from "@/components/farmer/ProduceListingDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,17 +53,21 @@ const FarmerDashboard = () => {
     toggleAvailability,
     uploadImage 
   } = useProduceListings();
+  
+  const { orders, loading: ordersLoading, updateOrderStatus } = useOrders();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingListing, setEditingListing] = useState<ProduceListing | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const pendingOrders = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
+
   const stats = [
     { label: "Total Listings", value: listings.length.toString(), icon: Package, color: "text-primary" },
     { label: "Active Listings", value: listings.filter(l => l.is_available).length.toString(), icon: ShoppingCart, color: "text-secondary" },
-    { label: "Total Quantity", value: `${listings.reduce((acc, l) => acc + Number(l.quantity_available), 0).toFixed(0)}`, icon: DollarSign, color: "text-accent" },
-    { label: "Categories", value: new Set(listings.map(l => l.category)).size.toString(), icon: TrendingUp, color: "text-primary" },
+    { label: "Total Orders", value: orders.length.toString(), icon: DollarSign, color: "text-accent" },
+    { label: "Pending Orders", value: pendingOrders.length.toString(), icon: TrendingUp, color: "text-primary" },
   ];
 
   const handleAddNew = () => {
@@ -288,12 +294,35 @@ const FarmerDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Orders</CardTitle>
+                <CardDescription>Manage incoming orders</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-6 text-muted-foreground">
-                  <ShoppingCart className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No orders yet</p>
-                </div>
+                {ordersLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <ShoppingCart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No orders yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                    {orders.slice(0, 5).map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        viewAs="farmer"
+                        onUpdateStatus={updateOrderStatus}
+                      />
+                    ))}
+                    {orders.length > 5 && (
+                      <p className="text-xs text-center text-muted-foreground">
+                        +{orders.length - 5} more orders
+                      </p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

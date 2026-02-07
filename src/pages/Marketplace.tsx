@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
+import OrderDialog from "@/components/marketplace/OrderDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,8 +42,10 @@ const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null);
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
 
-  const { listings, loading, categories } = useMarketplace({
+  const { listings, loading, categories, refetch } = useMarketplace({
     category: selectedCategory,
     search: debouncedSearch,
   });
@@ -51,6 +54,11 @@ const Marketplace = () => {
     setSearchQuery(value);
     // Simple debounce
     setTimeout(() => setDebouncedSearch(value), 300);
+  };
+
+  const handleOrderClick = (listing: MarketplaceListing) => {
+    setSelectedListing(listing);
+    setOrderDialogOpen(true);
   };
 
   const allCategories = ["All", ...categories];
@@ -168,17 +176,29 @@ const Marketplace = () => {
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {listings.map((listing) => (
-                <ProduceCard key={listing.id} listing={listing} />
+                <ProduceCard key={listing.id} listing={listing} onOrder={handleOrderClick} />
               ))}
             </div>
           </>
         )}
       </main>
+
+      <OrderDialog
+        listing={selectedListing}
+        open={orderDialogOpen}
+        onOpenChange={setOrderDialogOpen}
+        onSuccess={refetch}
+      />
     </div>
   );
 };
 
-const ProduceCard = ({ listing }: { listing: MarketplaceListing }) => {
+interface ProduceCardProps {
+  listing: MarketplaceListing;
+  onOrder: (listing: MarketplaceListing) => void;
+}
+
+const ProduceCard = ({ listing, onOrder }: ProduceCardProps) => {
   const categoryEmoji = EMOJI_MAP[listing.category] || "📦";
 
   return (
@@ -242,9 +262,9 @@ const ProduceCard = ({ listing }: { listing: MarketplaceListing }) => {
           </div>
         </div>
 
-        <Button className="w-full mt-4" size="sm">
+        <Button className="w-full mt-4" size="sm" onClick={() => onOrder(listing)}>
           <ShoppingCart className="w-4 h-4 mr-2" />
-          Add to Cart
+          Order Now
         </Button>
       </CardContent>
     </Card>
