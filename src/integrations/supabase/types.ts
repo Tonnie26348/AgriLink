@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          order_id: string
+          price_per_unit: number
+          quantity: number
+          total_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          order_id: string
+          price_per_unit: number
+          quantity: number
+          total_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          order_id?: string
+          price_per_unit?: number
+          quantity?: number
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "produce_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          delivery_address: string | null
+          farmer_id: string
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          delivery_address?: string | null
+          farmer_id: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          delivery_address?: string | null
+          farmer_id?: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       produce_listings: {
         Row: {
           category: string
@@ -125,6 +206,13 @@ export type Database = {
     }
     Enums: {
       app_role: "farmer" | "buyer"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "processing"
+        | "shipped"
+        | "delivered"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -253,6 +341,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["farmer", "buyer"],
+      order_status: [
+        "pending",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+      ],
     },
   },
 } as const

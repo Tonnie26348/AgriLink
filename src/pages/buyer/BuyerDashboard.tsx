@@ -1,46 +1,47 @@
- import { useState } from "react";
- import { Link } from "react-router-dom";
- import { useAuth } from "@/contexts/AuthContext";
- import { Button } from "@/components/ui/button";
- import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
- import { Input } from "@/components/ui/input";
- import { 
-   Leaf, 
-   Search, 
-   ShoppingCart, 
-   Package, 
-   Heart, 
-   Clock,
-   MapPin,
-   Star,
-   Settings,
-   Bell,
-   LogOut
- } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOrders } from "@/hooks/useOrders";
+import OrderCard from "@/components/orders/OrderCard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { 
+  Leaf, 
+  Search, 
+  ShoppingCart, 
+  Package, 
+  Heart, 
+  Clock,
+  MapPin,
+  Star,
+  Settings,
+  Bell,
+  LogOut,
+  Loader2,
+} from "lucide-react";
  
- const BuyerDashboard = () => {
-   const { user, signOut } = useAuth();
-   const [searchQuery, setSearchQuery] = useState("");
- 
-   const featuredProduce = [
-     { id: 1, name: "Organic Tomatoes", farmer: "Ram Singh", price: "₹40/kg", rating: 4.8, location: "Punjab", image: "🍅" },
-     { id: 2, name: "Fresh Potatoes", farmer: "Lakshmi Devi", price: "₹25/kg", rating: 4.6, location: "UP", image: "🥔" },
-     { id: 3, name: "Green Peppers", farmer: "Suresh Kumar", price: "₹60/kg", rating: 4.9, location: "Maharashtra", image: "🫑" },
-     { id: 4, name: "Sweet Corn", farmer: "Priya Patel", price: "₹35/kg", rating: 4.7, location: "Gujarat", image: "🌽" },
-   ];
- 
-   const recentOrders = [
-     { id: "#ORD-2341", items: "Tomatoes, Onions", status: "Delivered", date: "Feb 3, 2026" },
-     { id: "#ORD-2340", items: "Potatoes", status: "In Transit", date: "Feb 2, 2026" },
-     { id: "#ORD-2339", items: "Green Peppers, Carrots", status: "Processing", date: "Feb 1, 2026" },
-   ];
- 
-   const stats = [
-     { label: "Total Orders", value: "23", icon: Package },
-     { label: "Cart Items", value: "4", icon: ShoppingCart },
-     { label: "Saved Farms", value: "8", icon: Heart },
-     { label: "Pending Delivery", value: "2", icon: Clock },
-   ];
+const BuyerDashboard = () => {
+  const { user, signOut } = useAuth();
+  const { orders, loading: ordersLoading } = useOrders();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const featuredProduce = [
+    { id: 1, name: "Organic Tomatoes", farmer: "Ram Singh", price: "₹40/kg", rating: 4.8, location: "Punjab", image: "🍅" },
+    { id: 2, name: "Fresh Potatoes", farmer: "Lakshmi Devi", price: "₹25/kg", rating: 4.6, location: "UP", image: "🥔" },
+    { id: 3, name: "Green Peppers", farmer: "Suresh Kumar", price: "₹60/kg", rating: 4.9, location: "Maharashtra", image: "🫑" },
+    { id: 4, name: "Sweet Corn", farmer: "Priya Patel", price: "₹35/kg", rating: 4.7, location: "Gujarat", image: "🌽" },
+  ];
+
+  const pendingOrders = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
+  const deliveredOrders = orders.filter((o) => o.status === "delivered");
+
+  const stats = [
+    { label: "Total Orders", value: orders.length.toString(), icon: Package },
+    { label: "In Progress", value: pendingOrders.length.toString(), icon: Clock },
+    { label: "Delivered", value: deliveredOrders.length.toString(), icon: ShoppingCart },
+    { label: "Saved Farms", value: "8", icon: Heart },
+  ];
  
    return (
      <div className="min-h-screen bg-muted/30">
@@ -167,44 +168,40 @@
              </Card>
            </div>
  
-           {/* Recent Orders */}
-           <div className="space-y-6">
-             <Card>
-               <CardHeader>
-                 <CardTitle>Recent Orders</CardTitle>
-                 <CardDescription>Track your purchases</CardDescription>
-               </CardHeader>
-               <CardContent>
-                 <div className="space-y-4">
-                   {recentOrders.map((order) => (
-                     <div
-                       key={order.id}
-                       className="p-3 rounded-lg bg-muted/50 border border-border/50"
-                     >
-                       <div className="flex items-center justify-between mb-1">
-                         <span className="font-medium text-sm">{order.id}</span>
-                         <span
-                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                             order.status === "Delivered"
-                               ? "bg-primary/10 text-primary"
-                               : order.status === "In Transit"
-                               ? "bg-secondary/10 text-secondary"
-                               : "bg-muted text-muted-foreground"
-                           }`}
-                         >
-                           {order.status}
-                         </span>
-                       </div>
-                       <p className="text-sm text-muted-foreground">{order.items}</p>
-                       <p className="text-xs text-muted-foreground mt-1">{order.date}</p>
-                     </div>
-                   ))}
-                 </div>
-                 <Button variant="outline" className="w-full mt-4">
-                   View All Orders
-                 </Button>
-               </CardContent>
-             </Card>
+            {/* Recent Orders */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Orders</CardTitle>
+                  <CardDescription>Track your purchases</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {ordersLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Package className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground mb-4">No orders yet</p>
+                      <Link to="/marketplace">
+                        <Button size="sm">Browse Marketplace</Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders.slice(0, 3).map((order) => (
+                        <OrderCard key={order.id} order={order} viewAs="buyer" />
+                      ))}
+                      {orders.length > 3 && (
+                        <Button variant="outline" className="w-full">
+                          View All {orders.length} Orders
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
  
              <Card>
                <CardHeader>
