@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PriceInsights } from "@/components/insights/PriceInsights";
 import { 
   Leaf, 
   Plus, 
@@ -30,7 +31,6 @@ import {
   TrendingUp, 
   DollarSign, 
   ShoppingCart,
-  BarChart3,
   Settings,
   Bell,
   LogOut,
@@ -268,28 +268,15 @@ const FarmerDashboard = () => {
             </Card>
           </div>
 
-          {/* Quick Actions & Insights */}
+          {/* Price Insights & Orders */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-primary" />
-                  AI Price Insights
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                    <p className="text-sm font-medium text-primary">Tomato prices trending up</p>
-                    <p className="text-xs text-muted-foreground">+12% from last week</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-secondary/5 border border-secondary/20">
-                    <p className="text-sm font-medium text-secondary">Best time to sell onions</p>
-                    <p className="text-xs text-muted-foreground">High demand in your area</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {listings.length > 0 && (
+              <PriceInsights
+                crop={listings[0].name}
+                currentPrice={listings[0].price_per_unit}
+                unit={listings[0].unit}
+              />
+            )}
 
             <Card>
               <CardHeader>
