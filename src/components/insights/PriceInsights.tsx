@@ -3,43 +3,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, TrendingDown, Minus, Sparkles, AlertCircle } from "lucide-react";
+import { Sparkles, AlertCircle, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 
-interface PriceInsight {
-  forecast: {
-    month: string;
-    price: number;
-    trend: "up" | "down" | "stable";
-  }[];
-  factors: string[];
-  recommendation: "sell" | "hold" | "wait";
+interface PriceGuidance {
+  suggestedPriceMin: number;
+  suggestedPriceMax: number;
+  demandLevel: "High" | "Medium" | "Low";
   reasoning: string;
-  confidence: "high" | "medium" | "low";
+  pricePosition: "below" | "within" | "above";
 }
 
 interface PriceInsightsProps {
-  crop: string;
+  produceType: string;
   currentPrice: number;
   unit: string;
+  quantity?: number;
+  location?: string;
 }
 
-export const PriceInsights = ({ crop, currentPrice, unit }: PriceInsightsProps) => {
-  const [insights, setInsights] = useState<PriceInsight | null>(null);
+export const PriceInsights = ({ 
+  produceType, 
+  currentPrice, 
+  unit, 
+  quantity = 0,
+  location = "Kenya" 
+}: PriceInsightsProps) => {
+  const [guidance, setGuidance] = useState<PriceGuidance | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchInsights = async () => {
+  const fetchGuidance = async () => {
     setLoading(true);
     setError(null);
 
@@ -52,7 +47,13 @@ export const PriceInsights = ({ crop, currentPrice, unit }: PriceInsightsProps) 
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ crop, currentPrice, unit }),
+          body: JSON.stringify({ 
+            produceType, 
+            currentPrice, 
+            unit,
+            quantity,
+            location 
+          }),
         }
       );
 
@@ -64,13 +65,13 @@ export const PriceInsights = ({ crop, currentPrice, unit }: PriceInsightsProps) 
         if (response.status === 402) {
           throw new Error("AI credits exhausted. Please contact support.");
         }
-        throw new Error(errorData.error || "Failed to fetch insights");
+        throw new Error(errorData.error || "Failed to fetch guidance");
       }
 
       const data = await response.json();
-      setInsights(data.insights);
+      setGuidance(data.guidance);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to fetch insights";
+      const message = err instanceof Error ? err.message : "Failed to fetch guidance";
       setError(message);
       toast({
         title: "Error",
@@ -82,54 +83,61 @@ export const PriceInsights = ({ crop, currentPrice, unit }: PriceInsightsProps) 
     }
   };
 
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case "up":
-        return <TrendingUp className="h-4 w-4 text-green-500" />;
-      case "down":
-        return <TrendingDown className="h-4 w-4 text-red-500" />;
-      default:
-        return <Minus className="h-4 w-4 text-yellow-500" />;
-    }
-  };
-
-  const getRecommendationColor = (rec: string) => {
-    switch (rec) {
-      case "sell":
+  const getDemandColor = (level: string) => {
+    switch (level) {
+      case "High":
         return "bg-green-100 text-green-800 border-green-200";
-      case "wait":
+      case "Medium":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "Low":
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-muted text-muted-foreground";
     }
   };
 
-  const getConfidenceColor = (conf: string) => {
-    switch (conf) {
-      case "high":
-        return "bg-green-100 text-green-800";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800";
+  const getPricePositionInfo = (position: string) => {
+    switch (position) {
+      case "below":
+        return {
+          icon: TrendingUp,
+          text: "Your price is below the suggested range",
+          color: "text-yellow-600",
+          suggestion: "You could potentially increase your price",
+        };
+      case "above":
+        return {
+          icon: TrendingDown,
+          text: "Your price is above the suggested range",
+          color: "text-orange-600",
+          suggestion: "Consider if this is competitive for your market",
+        };
       default:
-        return "bg-red-100 text-red-800";
+        return {
+          icon: Minus,
+          text: "Your price is within the suggested range",
+          color: "text-green-600",
+          suggestion: "Your pricing looks competitive",
+        };
     }
   };
 
-  if (!insights && !loading) {
+  // Initial state - prompt to get insights
+  if (!guidance && !loading) {
     return (
-      <Card className="border-dashed">
+      <Card className="border-dashed border-primary/30 bg-primary/5">
         <CardContent className="pt-6 text-center">
-          <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="font-semibold mb-2">AI Price Insights</h3>
+          <Sparkles className="h-10 w-10 mx-auto text-primary mb-3" />
+          <h3 className="font-semibold text-foreground mb-2">AI Price Guidance</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Get AI-powered market predictions for {crop}
+            Get suggested price range and demand level for <strong>{produceType}</strong>
           </p>
-          <Button onClick={fetchInsights} className="gap-2">
+          <Button onClick={fetchGuidance} className="gap-2">
             <Sparkles className="h-4 w-4" />
-            Generate Insights
+            Get Price Guidance
           </Button>
           {error && (
-            <div className="mt-4 flex items-center gap-2 text-sm text-destructive">
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-destructive">
               <AlertCircle className="h-4 w-4" />
               {error}
             </div>
@@ -139,128 +147,79 @@ export const PriceInsights = ({ crop, currentPrice, unit }: PriceInsightsProps) 
     );
   }
 
+  // Loading state
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 animate-pulse" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-4 w-4 animate-pulse text-primary" />
             Analyzing Market...
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-[200px] w-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
+        <CardContent className="space-y-3">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-8 w-1/2" />
+          <Skeleton className="h-12 w-full" />
         </CardContent>
       </Card>
     );
   }
 
-  if (!insights) return null;
+  if (!guidance) return null;
 
-  // Prepare chart data with current price as first point
-  const chartData = [
-    { month: "Current", price: currentPrice },
-    ...insights.forecast,
-  ];
+  const positionInfo = getPricePositionInfo(guidance.pricePosition);
+  const PositionIcon = positionInfo.icon;
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <Card className="border-primary/20">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI Price Insights for {crop}
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-4 w-4 text-primary" />
+            AI Price Guidance
           </CardTitle>
-          <div className="flex gap-2">
-            <Badge className={getConfidenceColor(insights.confidence)}>
-              {insights.confidence} confidence
-            </Badge>
-            <Button variant="ghost" size="sm" onClick={fetchInsights}>
-              Refresh
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" onClick={fetchGuidance} className="h-8 text-xs">
+            Refresh
+          </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Price Forecast Chart */}
-        <div className="h-[200px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="month" className="text-xs" />
-              <YAxis
-                className="text-xs"
-                tickFormatter={(v) => `$${v}`}
-                domain={["auto", "auto"]}
-              />
-              <Tooltip
-                formatter={(value: number) => [`$${value.toFixed(2)}/${unit}`, "Price"]}
-                contentStyle={{
-                  backgroundColor: "hsl(var(--background))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="price"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                dot={{ fill: "hsl(var(--primary))" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Recommendation */}
-        <div
-          className={`p-4 rounded-lg border-2 ${getRecommendationColor(
-            insights.recommendation
-          )}`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-semibold text-lg capitalize">
-              Recommendation: {insights.recommendation}
+      <CardContent className="space-y-4">
+        {/* Suggested Price Range */}
+        <div className="bg-muted/50 rounded-lg p-4">
+          <p className="text-sm text-muted-foreground mb-1">Suggested Price Range</p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-bold text-foreground">
+              KES {guidance.suggestedPriceMin.toFixed(0)} - {guidance.suggestedPriceMax.toFixed(0)}
             </span>
-            {getTrendIcon(
-              insights.forecast[insights.forecast.length - 1]?.trend || "stable"
-            )}
+            <span className="text-muted-foreground">/{unit}</span>
           </div>
-          <p className="text-sm">{insights.reasoning}</p>
-        </div>
-
-        {/* Market Factors */}
-        <div>
-          <h4 className="font-medium mb-2">Key Market Factors</h4>
-          <div className="flex flex-wrap gap-2">
-            {insights.factors.map((factor, idx) => (
-              <Badge key={idx} variant="secondary">
-                {factor}
-              </Badge>
-            ))}
+          <div className="mt-2 flex items-center gap-2">
+            <PositionIcon className={`h-4 w-4 ${positionInfo.color}`} />
+            <span className={`text-sm ${positionInfo.color}`}>{positionInfo.text}</span>
           </div>
         </div>
 
-        {/* Monthly Breakdown */}
-        <div>
-          <h4 className="font-medium mb-2">6-Month Forecast</h4>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {insights.forecast.map((item, idx) => (
-              <div
-                key={idx}
-                className="text-center p-2 rounded-lg bg-muted/50"
-              >
-                <div className="text-xs text-muted-foreground">{item.month}</div>
-                <div className="font-semibold">${item.price.toFixed(2)}</div>
-                <div className="flex justify-center">{getTrendIcon(item.trend)}</div>
-              </div>
-            ))}
-          </div>
+        {/* Demand Level */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Current Demand</span>
+          <Badge className={`${getDemandColor(guidance.demandLevel)} border`}>
+            {guidance.demandLevel} Demand
+          </Badge>
         </div>
+
+        {/* AI Reasoning */}
+        <div className="bg-accent/10 rounded-lg p-3 flex gap-3">
+          <Info className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {guidance.reasoning}
+          </p>
+        </div>
+
+        {/* Disclaimer */}
+        <p className="text-xs text-muted-foreground text-center pt-2 border-t border-border/50">
+          This is AI-generated guidance. You retain full control over your pricing decisions.
+        </p>
       </CardContent>
     </Card>
   );

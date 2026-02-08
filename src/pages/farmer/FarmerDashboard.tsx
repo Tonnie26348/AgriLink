@@ -272,9 +272,10 @@ const FarmerDashboard = () => {
           <div className="space-y-6">
             {listings.length > 0 && (
               <PriceInsights
-                crop={listings[0].name}
+                produceType={listings[0].name}
                 currentPrice={listings[0].price_per_unit}
                 unit={listings[0].unit}
+                quantity={listings[0].quantity_available}
               />
             )}
 

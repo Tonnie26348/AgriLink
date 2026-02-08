@@ -11,36 +11,38 @@ serve(async (req) => {
   }
 
   try {
-    const { crop, currentPrice, unit } = await req.json();
+    const { produceType, currentPrice, unit, quantity, location, month } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are an agricultural market analyst AI. Analyze crop prices and provide market insights.
-Always respond with realistic market predictions based on typical seasonal patterns and market dynamics.
-Be helpful and provide actionable insights for farmers.`;
+    // System prompt aligned with project plan - AI as decision support
+    const systemPrompt = `You are an agricultural market analyst AI assistant for AgriLink. Your role is to provide price guidance to help farmers make informed decisions.
 
-    const userPrompt = `Analyze the market for ${crop} currently priced at ${currentPrice} per ${unit}.
+You analyze:
+- Produce type and current market conditions
+- Seasonal patterns (month/season)
+- Location-based market dynamics
+- Supply indicators (quantity available)
 
-Provide:
-1. A 6-month price forecast with monthly predictions
-2. Key market factors affecting this crop
-3. A recommendation for the farmer (sell now, hold, or wait)
+You provide simple, actionable guidance - NOT complex forecasts. Farmers retain full control over their final pricing decisions.`;
 
-Format your response as JSON with this structure:
-{
-  "forecast": [
-    {"month": "Month 1", "price": number, "trend": "up" | "down" | "stable"},
-    {"month": "Month 2", "price": number, "trend": "up" | "down" | "stable"},
-    ...6 months total
-  ],
-  "factors": ["factor1", "factor2", "factor3"],
-  "recommendation": "sell" | "hold" | "wait",
-  "reasoning": "Brief explanation of the recommendation",
-  "confidence": "high" | "medium" | "low"
-}`;
+    const currentMonth = month || new Date().toLocaleString('default', { month: 'long' });
+
+    const userPrompt = `Analyze pricing for this produce listing:
+
+Produce Type: ${produceType}
+Current Listed Price: ${currentPrice} per ${unit}
+Quantity Available: ${quantity} ${unit}
+Location: ${location || 'Kenya'}
+Current Month: ${currentMonth}
+
+Based on typical market patterns, provide:
+1. A suggested price range (minimum and maximum) in the same currency
+2. A demand level classification (High, Medium, or Low)
+3. Brief reasoning (1-2 sentences) for the farmer`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -58,43 +60,40 @@ Format your response as JSON with this structure:
           {
             type: "function",
             function: {
-              name: "provide_price_insights",
-              description: "Provide structured price insights for a crop",
+              name: "provide_price_guidance",
+              description: "Provide price range and demand level guidance for farm produce",
               parameters: {
                 type: "object",
                 properties: {
-                  forecast: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        month: { type: "string" },
-                        price: { type: "number" },
-                        trend: { type: "string", enum: ["up", "down", "stable"] },
-                      },
-                      required: ["month", "price", "trend"],
-                    },
+                  suggestedPriceMin: {
+                    type: "number",
+                    description: "Minimum suggested price per unit",
                   },
-                  factors: {
-                    type: "array",
-                    items: { type: "string" },
+                  suggestedPriceMax: {
+                    type: "number",
+                    description: "Maximum suggested price per unit",
                   },
-                  recommendation: {
+                  demandLevel: {
                     type: "string",
-                    enum: ["sell", "hold", "wait"],
+                    enum: ["High", "Medium", "Low"],
+                    description: "Current demand classification",
                   },
-                  reasoning: { type: "string" },
-                  confidence: {
+                  reasoning: {
                     type: "string",
-                    enum: ["high", "medium", "low"],
+                    description: "Brief explanation for the farmer (1-2 sentences)",
+                  },
+                  pricePosition: {
+                    type: "string",
+                    enum: ["below", "within", "above"],
+                    description: "Whether current price is below, within, or above suggested range",
                   },
                 },
-                required: ["forecast", "factors", "recommendation", "reasoning", "confidence"],
+                required: ["suggestedPriceMin", "suggestedPriceMax", "demandLevel", "reasoning", "pricePosition"],
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "provide_price_insights" } },
+        tool_choice: { type: "function", function: { name: "provide_price_guidance" } },
       }),
     });
 
@@ -123,9 +122,9 @@ Format your response as JSON with this structure:
       throw new Error("No structured response from AI");
     }
 
-    const insights = JSON.parse(toolCall.function.arguments);
+    const guidance = JSON.parse(toolCall.function.arguments);
 
-    return new Response(JSON.stringify({ success: true, insights }), {
+    return new Response(JSON.stringify({ success: true, guidance }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
