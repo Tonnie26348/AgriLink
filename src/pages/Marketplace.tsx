@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
 import OrderDialog from "@/components/marketplace/OrderDialog";
+import CartSheet from "@/components/cart/CartSheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,6 +41,7 @@ const EMOJI_MAP: Record<string, string> = {
 
 const Marketplace = () => {
   const { user, userRole } = useAuth();
+  const { addItem } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -61,6 +64,19 @@ const Marketplace = () => {
     setOrderDialogOpen(true);
   };
 
+  const handleAddToCart = (listing: MarketplaceListing) => {
+    addItem({
+      listingId: listing.id,
+      name: listing.name,
+      pricePerUnit: listing.price_per_unit,
+      unit: listing.unit,
+      farmerId: listing.farmer_id,
+      farmerName: listing.farmer_name || "Local Farmer",
+      imageUrl: listing.image_url,
+      maxQuantity: listing.quantity_available,
+    });
+  };
+
   const allCategories = ["All", ...categories];
 
   return (
@@ -77,7 +93,8 @@ const Marketplace = () => {
             </span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <CartSheet />
             {user && userRole === "buyer" && (
               <Link to="/buyer/dashboard">
                 <Button variant="ghost">
@@ -176,7 +193,12 @@ const Marketplace = () => {
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {listings.map((listing) => (
-                <ProduceCard key={listing.id} listing={listing} onOrder={handleOrderClick} />
+                <ProduceCard 
+                  key={listing.id} 
+                  listing={listing} 
+                  onOrder={handleOrderClick} 
+                  onAddToCart={handleAddToCart}
+                />
               ))}
             </div>
           </>
@@ -196,9 +218,10 @@ const Marketplace = () => {
 interface ProduceCardProps {
   listing: MarketplaceListing;
   onOrder: (listing: MarketplaceListing) => void;
+  onAddToCart: (listing: MarketplaceListing) => void;
 }
 
-const ProduceCard = ({ listing, onOrder }: ProduceCardProps) => {
+const ProduceCard = ({ listing, onOrder, onAddToCart }: ProduceCardProps) => {
   const categoryEmoji = EMOJI_MAP[listing.category] || "📦";
 
   return (
@@ -262,10 +285,20 @@ const ProduceCard = ({ listing, onOrder }: ProduceCardProps) => {
           </div>
         </div>
 
-        <Button className="w-full mt-4" size="sm" onClick={() => onOrder(listing)}>
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          Order Now
-        </Button>
+        <div className="flex gap-2 mt-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-1"
+            onClick={() => onAddToCart(listing)}
+          >
+            <ShoppingCart className="w-4 h-4 mr-1" />
+            Add
+          </Button>
+          <Button size="sm" className="flex-1" onClick={() => onOrder(listing)}>
+            Buy Now
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
