@@ -5,21 +5,21 @@ const AIInsights = () => {
   const insights = [
     {
       icon: TrendingUp,
-      title: "Price Predictions",
-      description: "Get AI-suggested price ranges based on historical data, seasonal patterns, and current market demand.",
-      sample: "Tomatoes: KES 40-50/kg (↑15% expected next week)",
-    },
-    {
-      icon: Calendar,
-      title: "Seasonal Trends",
-      description: "Understand the best times to sell or buy specific crops for maximum profitability.",
-      sample: "Peak maize demand: March-April, August-September",
+      title: "Price Ranges",
+      description: "Get AI-suggested price ranges (minimum and maximum) based on historical market data and seasonal patterns.",
+      sample: "Tomatoes: ₹40-50/kg (suggested range for current season)",
     },
     {
       icon: Target,
-      title: "Demand Estimation",
-      description: "Know which products are in high demand in your area before you plant or harvest.",
-      sample: "High demand: Avocados, French Beans, Sukuma Wiki",
+      title: "Demand Indicators",
+      description: "See real-time demand levels (High, Medium, Low) to make informed pricing decisions.",
+      sample: "Tomatoes: High demand | Market price within range",
+    },
+    {
+      icon: Calendar,
+      title: "Market Transparency",
+      description: "Access historical trend data and regional pricing patterns to reduce exploitation and improve fair pricing.",
+      sample: "Transparent pricing helps you negotiate confidently",
     },
   ];
 
