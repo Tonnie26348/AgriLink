@@ -3,13 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Sparkles, AlertCircle, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,36 +14,27 @@ interface PriceGuidance {
   pricePosition: "below" | "within" | "above";
 }
 
-interface ListingOption {
-  id: string;
-  name: string;
-  price_per_unit: number;
-  unit: string;
-  quantity_available: number;
-}
-
 interface PriceInsightsProps {
-  listings: ListingOption[];
+  produceType: string;
+  currentPrice: number;
+  unit: string;
+  quantity?: number;
   location?: string;
 }
 
 export const PriceInsights = ({ 
-  listings, 
+  produceType, 
+  currentPrice, 
+  unit, 
+  quantity = 0,
   location = "Kenya" 
 }: PriceInsightsProps) => {
-  const [selectedListingId, setSelectedListingId] = useState<string>(
-    listings.length > 0 ? listings[0].id : ""
-  );
   const [guidance, setGuidance] = useState<PriceGuidance | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const selectedListing = listings.find(l => l.id === selectedListingId);
-
   const fetchGuidance = async () => {
-    if (!selectedListing) return;
-
     setLoading(true);
     setError(null);
 
@@ -64,10 +48,10 @@ export const PriceInsights = ({
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ 
-            produceType: selectedListing.name, 
-            currentPrice: selectedListing.price_per_unit, 
-            unit: selectedListing.unit,
-            quantity: selectedListing.quantity_available,
+            produceType, 
+            currentPrice, 
+            unit,
+            quantity,
             location 
           }),
         }
@@ -97,12 +81,6 @@ export const PriceInsights = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleListingChange = (listingId: string) => {
-    setSelectedListingId(listingId);
-    setGuidance(null); // Reset guidance when changing listing
-    setError(null);
   };
 
   const getDemandColor = (level: string) => {
@@ -144,39 +122,17 @@ export const PriceInsights = ({
     }
   };
 
-  if (listings.length === 0) {
-    return null;
-  }
-
   // Initial state - prompt to get insights
   if (!guidance && !loading) {
     return (
       <Card className="border-dashed border-primary/30 bg-primary/5">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 text-center">
           <Sparkles className="h-10 w-10 mx-auto text-primary mb-3" />
-          <h3 className="font-semibold text-foreground mb-3 text-center">AI Price Guidance</h3>
-          
-          {/* Listing Selector */}
-          <div className="mb-4">
-            <label className="text-sm text-muted-foreground mb-2 block">Select a listing to analyze</label>
-            <Select value={selectedListingId} onValueChange={handleListingChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a listing" />
-              </SelectTrigger>
-              <SelectContent>
-                {listings.map((listing) => (
-                  <SelectItem key={listing.id} value={listing.id}>
-                    {listing.name} - ₹{listing.price_per_unit}/{listing.unit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <p className="text-sm text-muted-foreground mb-4 text-center">
-            Get suggested price range and demand level for your produce
+          <h3 className="font-semibold text-foreground mb-2">AI Price Guidance</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Get suggested price range and demand level for <strong>{produceType}</strong>
           </p>
-          <Button onClick={fetchGuidance} className="gap-2 w-full" disabled={!selectedListing}>
+          <Button onClick={fetchGuidance} className="gap-2">
             <Sparkles className="h-4 w-4" />
             Get Price Guidance
           </Button>
@@ -210,7 +166,7 @@ export const PriceInsights = ({
     );
   }
 
-  if (!guidance || !selectedListing) return null;
+  if (!guidance) return null;
 
   const positionInfo = getPricePositionInfo(guidance.pricePosition);
   const PositionIcon = positionInfo.icon;
@@ -229,20 +185,6 @@ export const PriceInsights = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Listing Selector */}
-        <Select value={selectedListingId} onValueChange={handleListingChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a listing" />
-          </SelectTrigger>
-          <SelectContent>
-            {listings.map((listing) => (
-              <SelectItem key={listing.id} value={listing.id}>
-                {listing.name} - ₹{listing.price_per_unit}/{listing.unit}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         {/* Suggested Price Range */}
         <div className="bg-muted/50 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Suggested Price Range</p>
@@ -250,7 +192,7 @@ export const PriceInsights = ({
             <span className="text-2xl font-bold text-foreground">
               KES {guidance.suggestedPriceMin.toFixed(0)} - {guidance.suggestedPriceMax.toFixed(0)}
             </span>
-            <span className="text-muted-foreground">/{selectedListing.unit}</span>
+            <span className="text-muted-foreground">/{unit}</span>
           </div>
           <div className="mt-2 flex items-center gap-2">
             <PositionIcon className={`h-4 w-4 ${positionInfo.color}`} />
