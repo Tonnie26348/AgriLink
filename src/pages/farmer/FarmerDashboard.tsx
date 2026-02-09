@@ -272,10 +272,13 @@ const FarmerDashboard = () => {
           <div className="space-y-6">
             {listings.length > 0 && (
               <PriceInsights
-                produceType={listings[0].name}
-                currentPrice={listings[0].price_per_unit}
-                unit={listings[0].unit}
-                quantity={listings[0].quantity_available}
+                listings={listings.map(l => ({
+                  id: l.id,
+                  name: l.name,
+                  price_per_unit: l.price_per_unit,
+                  unit: l.unit,
+                  quantity_available: l.quantity_available,
+                }))}
               />
             )}
 
