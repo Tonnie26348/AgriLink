@@ -3,6 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Sparkles, AlertCircle, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,21 +21,25 @@ interface PriceGuidance {
   pricePosition: "below" | "within" | "above";
 }
 
-interface PriceInsightsProps {
-  produceType: string;
-  currentPrice: number;
+export interface ListingOption {
+  id: string;
+  name: string;
+  price_per_unit: number;
   unit: string;
-  quantity?: number;
+  quantity_available: number;
+}
+
+interface PriceInsightsProps {
+  listings: ListingOption[];
   location?: string;
 }
 
 export const PriceInsights = ({ 
-  produceType, 
-  currentPrice, 
-  unit, 
-  quantity = 0,
+  listings,
   location = "Kenya" 
 }: PriceInsightsProps) => {
+  const [selectedId, setSelectedId] = useState<string>(listings[0]?.id || "");
+  const selected = listings.find((l) => l.id === selectedId) || listings[0];
   const [guidance, setGuidance] = useState<PriceGuidance | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,10 +59,10 @@ export const PriceInsights = ({
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ 
-            produceType, 
-            currentPrice, 
-            unit,
-            quantity,
+            produceType: selected.name, 
+            currentPrice: selected.price_per_unit, 
+            unit: selected.unit,
+            quantity: selected.quantity_available,
             location 
           }),
         }
@@ -122,26 +133,50 @@ export const PriceInsights = ({
     }
   };
 
+  const handleListingChange = (id: string) => {
+    setSelectedId(id);
+    setGuidance(null);
+    setError(null);
+  };
+
+  if (!selected) return null;
+
   // Initial state - prompt to get insights
   if (!guidance && !loading) {
     return (
       <Card className="border-dashed border-primary/30 bg-primary/5">
-        <CardContent className="pt-6 text-center">
-          <Sparkles className="h-10 w-10 mx-auto text-primary mb-3" />
-          <h3 className="font-semibold text-foreground mb-2">AI Price Guidance</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Get suggested price range and demand level for <strong>{produceType}</strong>
-          </p>
-          <Button onClick={fetchGuidance} className="gap-2">
-            <Sparkles className="h-4 w-4" />
-            Get Price Guidance
-          </Button>
-          {error && (
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-destructive">
-              <AlertCircle className="h-4 w-4" />
-              {error}
-            </div>
+        <CardContent className="pt-6 space-y-4">
+          {listings.length > 1 && (
+            <Select value={selectedId} onValueChange={handleListingChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a listing" />
+              </SelectTrigger>
+              <SelectContent>
+                {listings.map((l) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    {l.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
+          <div className="text-center">
+            <Sparkles className="h-10 w-10 mx-auto text-primary mb-3" />
+            <h3 className="font-semibold text-foreground mb-2">AI Price Guidance</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Get suggested price range and demand level for <strong>{selected.name}</strong>
+            </p>
+            <Button onClick={fetchGuidance} className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              Get Price Guidance
+            </Button>
+            {error && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -192,7 +227,7 @@ export const PriceInsights = ({
             <span className="text-2xl font-bold text-foreground">
               KES {guidance.suggestedPriceMin.toFixed(0)} - {guidance.suggestedPriceMax.toFixed(0)}
             </span>
-            <span className="text-muted-foreground">/{unit}</span>
+            <span className="text-muted-foreground">/{selected.unit}</span>
           </div>
           <div className="mt-2 flex items-center gap-2">
             <PositionIcon className={`h-4 w-4 ${positionInfo.color}`} />
