@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
 import OrderDialog from "@/components/marketplace/OrderDialog";
+import ProduceCardSkeleton from "@/components/marketplace/ProduceCardSkeleton";
 import CartSheet from "@/components/cart/CartSheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -75,6 +77,7 @@ const Marketplace = () => {
       imageUrl: listing.image_url,
       maxQuantity: listing.quantity_available,
     });
+    toast.success(`${listing.name} added to cart!`);
   };
 
   const allCategories = ["All", ...categories];
@@ -168,8 +171,10 @@ const Marketplace = () => {
 
         {/* Listings Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProduceCardSkeleton key={i} />
+            ))}
           </div>
         ) : listings.length === 0 ? (
           <div className="text-center py-20">
