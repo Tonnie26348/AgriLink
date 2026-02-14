@@ -2,7 +2,7 @@
  import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
  import { Menu, X, Leaf, LogOut, Tractor, ShoppingBag } from "lucide-react";
- import { useAuth } from "@/contexts/AuthContext";
+ import { useAuth } from "@/contexts/auth-context-definition";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
