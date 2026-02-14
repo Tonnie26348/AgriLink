@@ -40,12 +40,28 @@ export const PriceInsights = ({
 }: PriceInsightsProps) => {
   const [selectedId, setSelectedId] = useState<string>(listings[0]?.id || "");
   const selected = listings.find((l) => l.id === selectedId) || listings[0];
+  // const [guidance, setGuidance] = useState<PriceGuidance | null>(null); // Supabase removed
+  // const [loading, setLoading] = useState(false); // Supabase removed
+  // const [error, setError] = useState<string | null>(null); // Supabase removed
+
+  // Mock states as Supabase/Edge Functions are removed
   const [guidance, setGuidance] = useState<PriceGuidance | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const { toast } = useToast();
 
-  const fetchGuidance = async () => {
+  const fetchGuidance = async () => { // Supabase removed
+    console.warn("AI Price Guidance fetching is disabled as Supabase Edge Functions are removed.");
+    setLoading(true);
+    setError(null);
+    toast({
+      title: "AI Guidance Unavailable",
+      description: "This feature is currently disabled.",
+      variant: "destructive",
+    });
+    // Original logic commented out below:
+    /*
     setLoading(true);
     setError(null);
 
@@ -92,6 +108,8 @@ export const PriceInsights = ({
     } finally {
       setLoading(false);
     }
+    */
+    setLoading(false);
   };
 
   const getDemandColor = (level: string) => {
@@ -164,11 +182,12 @@ export const PriceInsights = ({
             <Sparkles className="h-10 w-10 mx-auto text-primary mb-3" />
             <h3 className="font-semibold text-foreground mb-2">AI Price Guidance</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Get suggested price range and demand level for <strong>{selected.name}</strong>
+              {/* Get suggested price range and demand level for <strong>{selected.name}</strong> // Supabase removed */}
+              AI Price Guidance is currently unavailable.
             </p>
-            <Button onClick={fetchGuidance} className="gap-2">
+            <Button onClick={fetchGuidance} className="gap-2" disabled> {/* Button disabled */}
               <Sparkles className="h-4 w-4" />
-              Get Price Guidance
+              Get Price Guidance (Unavailable)
             </Button>
             {error && (
               <div className="mt-4 flex items-center justify-center gap-2 text-sm text-destructive">
@@ -201,7 +220,28 @@ export const PriceInsights = ({
     );
   }
 
-  if (!guidance) return null;
+  // Modified to show placeholder if no guidance
+  if (!guidance) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-4 w-4 text-primary" />
+            AI Price Guidance
+          </CardTitle>
+          <Button variant="ghost" size="sm" onClick={fetchGuidance} className="h-8 text-xs" disabled>
+            Refresh (Unavailable)
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-4">
+            <AlertCircle className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground">AI price guidance is currently unavailable.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const positionInfo = getPricePositionInfo(guidance.pricePosition);
   const PositionIcon = positionInfo.icon;
@@ -214,8 +254,8 @@ export const PriceInsights = ({
             <Sparkles className="h-4 w-4 text-primary" />
             AI Price Guidance
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={fetchGuidance} className="h-8 text-xs">
-            Refresh
+          <Button variant="ghost" size="sm" onClick={fetchGuidance} className="h-8 text-xs" disabled>
+            Refresh (Unavailable)
           </Button>
         </div>
       </CardHeader>

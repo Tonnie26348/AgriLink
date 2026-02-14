@@ -1,112 +1,55 @@
  import { createContext, useContext, useEffect, useState, ReactNode } from "react";
- import { User, Session } from "@supabase/supabase-js";
- import { supabase } from "@/integrations/supabase/client";
+// import { User, Session } from "@supabase/supabase-js"; // Supabase removed
+// import { supabase } from "@/integrations/supabase/client"; // Supabase removed
  import { AppRole, AuthContextType } from "./auth-types";
- import { AuthContext, useAuth } from "./auth-context-definition";
+// import { AuthContext, useAuth } from "./auth-context-definition"; // AuthContext is defined later, remove import to avoid circular dependency
  
  
  export const AuthProvider = ({ children }: { children: ReactNode }) => {
-   const [user, setUser] = useState<User | null>(null);
-   const [session, setSession] = useState<Session | null>(null);
-   const [userRole, setUserRole] = useState<AppRole | null>(null);
-   const [loading, setLoading] = useState(true);
+//   const [user, setUser] = useState<User | null>(null); // Supabase removed
+//   const [session, setSession] = useState<Session | null>(null); // Supabase removed
+//   const [userRole, setUserRole] = useState<AppRole | null>(null); // Supabase removed
+//   const [loading, setLoading] = useState(true); // Supabase removed
+
+  // Mock states as Supabase is removed
+  const [user, setUser] = useState<any | null>(null);
+  const [session, setSession] = useState<any | null>(null);
+  const [userRole, setUserRole] = useState<AppRole | null>(null);
+  const [loading, setLoading] = useState(false); // No loading as no external auth
  
-   const fetchUserRole = async (userId: string) => {
-     const { data, error } = await supabase
-       .from("user_roles")
-       .select("role")
-       .eq("user_id", userId)
-       .single();
+//   const fetchUserRole = async (userId: string) => { // Supabase removed
+//     const { data, error } = await supabase
+//       .from("user_roles")
+//       .select("role")
+//       .eq("user_id", userId)
+//       .single();
  
-     if (data && !error) {
-       setUserRole(data.role as AppRole);
-     }
-   };
+//     if (data && !error) {
+//       setUserRole(data.role as AppRole);
+//     }
+//   }; // Supabase removed
  
-   useEffect(() => {
-     // Set up auth state listener BEFORE checking session
-     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-       async (event, session) => {
-         setSession(session);
-         setUser(session?.user ?? null);
-         
-         if (session?.user) {
-           // Use setTimeout to avoid potential deadlock with Supabase client
-           setTimeout(() => fetchUserRole(session.user.id), 0);
-         } else {
-           setUserRole(null);
-         }
-         
-         setLoading(false);
-       }
-     );
+   useEffect(() => { // Supabase removed
+     // Mock useEffect for removed Supabase
+     setLoading(false);
+   }, []); // Supabase removed
  
-     // Check for existing session
-     supabase.auth.getSession().then(({ data: { session } }) => {
-       setSession(session);
-       setUser(session?.user ?? null);
-       if (session?.user) {
-         fetchUserRole(session.user.id);
-       }
-       setLoading(false);
-     });
+   const signUp = async (email: string, password: string, fullName: string, role: AppRole) => { // Supabase removed
+     console.warn("Sign up is disabled as Supabase is removed.");
+     return { error: new Error("Sign up is currently disabled.") };
+   }; // Supabase removed
  
-     return () => subscription.unsubscribe();
-   }, []);
+   const signIn = async (email: string, password: string) => { // Supabase removed
+     console.warn("Sign in is disabled as Supabase is removed.");
+     return { error: new Error("Sign in is currently disabled.") };
+   }; // Supabase removed
  
-   const signUp = async (email: string, password: string, fullName: string, role: AppRole) => {
-     try {
-       const { data, error } = await supabase.auth.signUp({
-         email,
-         password,
-         options: {
-           emailRedirectTo: window.location.origin,
-           data: {
-             full_name: fullName,
-           },
-         },
-       });
- 
-       if (error) throw error;
- 
-       // If user is created (and auto-confirmed or email confirmation disabled)
-       if (data.user) {
-         // Insert user role
-         const { error: roleError } = await supabase
-           .from("user_roles")
-           .insert({ user_id: data.user.id, role });
- 
-         if (roleError) {
-           console.error("Error setting user role:", roleError);
-         }
-       }
- 
-       return { error: null };
-     } catch (error) {
-       return { error: error as Error };
-     }
-   };
- 
-   const signIn = async (email: string, password: string) => {
-     try {
-       const { error } = await supabase.auth.signInWithPassword({
-         email,
-         password,
-       });
- 
-       if (error) throw error;
-       return { error: null };
-     } catch (error) {
-       return { error: error as Error };
-     }
-   };
- 
-   const signOut = async () => {
-     await supabase.auth.signOut();
+   const signOut = async () => { // Supabase removed
+     console.warn("Sign out is disabled as Supabase is removed.");
      setUser(null);
      setSession(null);
      setUserRole(null);
-   };
+   }; // Supabase removed
  
    return (
      <AuthContext.Provider

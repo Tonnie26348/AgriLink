@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+// import { supabase } from "@/integrations/supabase/client"; // Supabase removed
 import { useAuth } from "@/contexts/auth-context-definition";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,197 +49,50 @@ export interface CreateOrderInput {
 export const useOrders = () => {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
+  // const [orders, setOrders] = useState<Order[]>([]); // Supabase removed
+  // const [loading, setLoading] = useState(true); // Supabase removed
+
+  // Mock states as Supabase is removed
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const fetchOrders = useCallback(async () => {
-    if (!user) return;
+  const fetchOrders = useCallback(async () => { // Supabase removed
+    // console.warn("Orders fetching is disabled as Supabase is removed.");
+    setLoading(false);
+    setOrders([]); // Return empty data
+  }, [user, toast]); // Supabase removed
 
-    try {
-      setLoading(true);
+  const createOrder = async (input: CreateOrderInput): Promise<boolean> => { // Supabase removed
+    console.warn("Order creation is disabled as Supabase is removed.");
+    toast({
+      title: "Action Disabled",
+      description: "Creating orders is currently disabled.",
+      variant: "destructive",
+    });
+    return false;
+  }; // Supabase removed
 
-      const { data: ordersData, error } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
+  const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<boolean> => { // Supabase removed
+    console.warn("Order status update is disabled as Supabase is removed.");
+    toast({
+      title: "Action Disabled",
+      description: "Updating order status is currently disabled.",
+      variant: "destructive",
+    });
+    return false;
+  }; // Supabase removed
 
-      if (error) throw error;
-
-      if (ordersData && ordersData.length > 0) {
-        // Fetch order items for each order
-        const orderIds = ordersData.map((o) => o.id);
-        const { data: itemsData } = await supabase
-          .from("order_items")
-          .select("*")
-          .in("order_id", orderIds);
-
-        // Fetch listing details for items
-        const listingIds = [...new Set(itemsData?.map((i) => i.listing_id) || [])];
-        const { data: listingsData } = await supabase
-          .from("produce_listings")
-          .select("id, name, unit, image_url")
-          .in("id", listingIds);
-
-        const listingMap = new Map(listingsData?.map((l) => [l.id, l]) || []);
-
-        // Fetch buyer/farmer profiles
-        const userIds = [
-          ...new Set([
-            ...ordersData.map((o) => o.buyer_id),
-            ...ordersData.map((o) => o.farmer_id),
-          ]),
-        ];
-        const { data: profilesData } = await supabase
-          .from("profiles")
-          .select("user_id, full_name")
-          .in("user_id", userIds);
-
-        const profileMap = new Map(profilesData?.map((p) => [p.user_id, p.full_name]) || []);
-
-        // Enrich orders with items and names
-        const enrichedOrders = ordersData.map((order) => {
-          const orderItems = (itemsData || [])
-            .filter((item) => item.order_id === order.id)
-            .map((item) => ({
-              ...item,
-              listing_name: listingMap.get(item.listing_id)?.name,
-              listing_unit: listingMap.get(item.listing_id)?.unit,
-              listing_image_url: listingMap.get(item.listing_id)?.image_url,
-            }));
-
-          return {
-            ...order,
-            status: order.status as OrderStatus,
-            items: orderItems,
-            buyer_name: profileMap.get(order.buyer_id) || "Unknown Buyer",
-            farmer_name: profileMap.get(order.farmer_id) || "Unknown Farmer",
-          };
-        });
-
-        setOrders(enrichedOrders);
-      } else {
-        setOrders([]);
-      }
-    } catch (error: unknown) {
-      toast({
-        title: "Error loading orders",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [user, toast]);
-
-  const createOrder = async (input: CreateOrderInput): Promise<boolean> => {
-    if (!user) return false;
-
-    try {
-      const totalAmount = input.items.reduce(
-        (sum, item) => sum + item.quantity * item.price_per_unit,
-        0
-      );
-
-      // Create order
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          buyer_id: user.id,
-          farmer_id: input.farmer_id,
-          total_amount: totalAmount,
-          delivery_address: input.delivery_address,
-          notes: input.notes,
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = input.items.map((item) => ({
-        order_id: orderData.id,
-        listing_id: item.listing_id,
-        quantity: item.quantity,
-        price_per_unit: item.price_per_unit,
-        total_price: item.quantity * item.price_per_unit,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // Update listing quantities
-      for (const item of input.items) {
-        const { data: listing } = await supabase
-          .from("produce_listings")
-          .select("quantity_available")
-          .eq("id", item.listing_id)
-          .single();
-
-        if (listing) {
-          await supabase
-            .from("produce_listings")
-            .update({
-              quantity_available: Math.max(0, Number(listing.quantity_available) - item.quantity),
-            })
-            .eq("id", item.listing_id);
-        }
-      }
-
-      toast({
-        title: "Order placed!",
-        description: "Your order has been submitted to the farmer.",
-      });
-
-      fetchOrders();
-      return true;
-    } catch (error: unknown) {
-      toast({
-        title: "Error placing order",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<boolean> => {
-    try {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status })
-        .eq("id", orderId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Order updated",
-        description: `Order status changed to ${status}`,
-      });
-
-      fetchOrders();
-      return true;
-    } catch (error: unknown) {
-      toast({
-        title: "Error updating order",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+  useEffect(() => { // Supabase removed
+    // Mock useEffect for removed Supabase
+    setLoading(false);
+    setOrders([]);
+  }, [fetchOrders]); // Supabase removed
 
   return {
     orders,
     loading,
     createOrder,
     updateOrderStatus,
-    refetch: fetchOrders,
+    refetch: fetchOrders, // Keep refetch available but it does nothing
   };
 };

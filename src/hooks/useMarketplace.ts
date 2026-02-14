@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+// import { supabase } from "@/integrations/supabase/client"; // Supabase removed
 import { useAuth } from "@/contexts/auth-context-definition";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,104 +27,41 @@ interface UseMarketplaceOptions {
 export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  // const [listings, setListings] = useState<MarketplaceListing[]>([]); // Supabase removed
+  // const [loading, setLoading] = useState(true); // Supabase removed
+  // const [categories, setCategories] = useState<string[]>([]); // Supabase removed
+
+  // Mock states as Supabase is removed
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
 
-  const fetchListings = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      let query = supabase
-        .from("produce_listings")
-        .select(`
-          id,
-          farmer_id,
-          name,
-          description,
-          category,
-          price_per_unit,
-          unit,
-          quantity_available,
-          image_url,
-          harvest_date,
-          created_at
-        `)
-        .eq("is_available", true)
-        .gt("quantity_available", 0)
-        .order("created_at", { ascending: false });
+  const fetchListings = useCallback(async () => { // Supabase removed
+    // console.warn("Marketplace listings fetching is disabled as Supabase is removed.");
+    setLoading(false);
+    setListings([]); // Return empty data
+  }, [options.category, options.search, toast]); // Supabase removed
 
-      if (options.category && options.category !== "All") {
-        query = query.eq("category", options.category);
-      }
+  const fetchCategories = async () => { // Supabase removed
+    // console.warn("Category fetching is disabled as Supabase is removed.");
+    setCategories([]); // Return empty categories
+  }; // Supabase removed
 
-      if (options.search) {
-        query = query.or(`name.ilike.%${options.search}%,description.ilike.%${options.search}%`);
-      }
+  useEffect(() => { // Supabase removed
+    // Mock useEffect for removed Supabase
+    setLoading(false);
+    setListings([]);
+    setCategories([]);
+  }, [fetchListings]); // Supabase removed
 
-      const { data: listingsData, error } = await query;
-
-      if (error) throw error;
-
-      // Fetch farmer profiles for the listings
-      if (listingsData && listingsData.length > 0) {
-        const farmerIds = [...new Set(listingsData.map(l => l.farmer_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, full_name, location")
-          .in("user_id", farmerIds);
-
-        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-        
-        const enrichedListings = listingsData.map(listing => ({
-          ...listing,
-          farmer_name: profileMap.get(listing.farmer_id)?.full_name || "Local Farmer",
-          farmer_location: profileMap.get(listing.farmer_id)?.location || "India",
-        }));
-
-        setListings(enrichedListings);
-      } else {
-        setListings([]);
-      }
-    } catch (error: unknown) {
-      toast({
-        title: "Error loading marketplace",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [options.category, options.search, toast]);
-
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("produce_listings")
-        .select("category")
-        .eq("is_available", true);
-
-      if (error) throw error;
-
-      const uniqueCategories = [...new Set(data?.map(d => d.category) || [])];
-      setCategories(uniqueCategories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchListings();
-  }, [fetchListings]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  useEffect(() => { // Supabase removed
+    // Mock useEffect for removed Supabase
+  }, []); // Supabase removed
 
   return {
     listings,
     loading,
     categories,
-    refetch: fetchListings,
+    refetch: fetchListings, // Keep refetch available but it does nothing
   };
 };

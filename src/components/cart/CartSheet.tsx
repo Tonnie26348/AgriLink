@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/cart-context-definition";
 import { useAuth } from "@/contexts/auth-context-definition";
-import { supabase } from "@/integrations/supabase/client";
+// import { supabase } from "@/integrations/supabase/client"; // Supabase removed
 import { useToast } from "@/hooks/use-toast";
 import CartItem from "./CartItem";
 
@@ -29,7 +29,15 @@ const CartSheet = () => {
   const total = getTotal();
   const farmerGroups = getItemsByFarmer();
 
+  // Temporarily disable checkout due to Supabase removal
   const handleCheckout = async () => {
+    toast({
+      title: "Checkout Unavailable",
+      description: "Supabase integration is currently disabled.",
+      variant: "destructive",
+    });
+    // Original checkout logic commented out below:
+    /*
     if (!user) {
       toast({
         title: "Please sign in",
@@ -123,6 +131,7 @@ const CartSheet = () => {
     } finally {
       setIsCheckingOut(false);
     }
+    */
   };
 
   return (
@@ -207,18 +216,13 @@ const CartSheet = () => {
                 className="w-full"
                 size="lg"
                 onClick={handleCheckout}
-                disabled={isCheckingOut}
+                disabled={true} // Always disabled as Supabase is removed
               >
-                {isCheckingOut ? (
+                {
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
+                    Checkout Unavailable
                   </>
-                ) : (
-                  <>
-                    Checkout • ₹{total.toFixed(0)}
-                  </>
-                )}
+                }
               </Button>
             </div>
           </>
