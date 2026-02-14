@@ -59,7 +59,7 @@ interface ProduceListingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   listing?: ProduceListing | null;
-  onSubmit: (data: CreateListingInput) => Promise<{ error: Error | null; data?: any }>;
+  onSubmit: (data: CreateListingInput) => Promise<{ error: Error | null; data?: ProduceListing | null }>;
   onUploadImage: (file: File) => Promise<string | null>;
 }
 

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { CART_STORAGE_KEY } from "./cart-constants";
 
 export interface CartItem {
   listingId: string;
@@ -26,7 +27,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = "agrilink_cart";
+
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();

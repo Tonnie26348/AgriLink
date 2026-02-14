@@ -5,12 +5,16 @@ import Login from "@/pages/Login";
 import { AuthProvider } from "@/contexts/AuthContext"; // Assuming AuthProvider is the correct provider
 
 // Mock the useAuth hook
-vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => ({
-    signIn: vi.fn(),
-    userRole: null,
-  }),
-}));
+vi.mock("@/contexts/AuthContext", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useAuth: () => ({
+      signIn: vi.fn(),
+      userRole: null,
+    }),
+  };
+});
 
 // Mock the useToast hook
 vi.mock("@/hooks/use-toast", () => ({

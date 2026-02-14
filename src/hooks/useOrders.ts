@@ -120,10 +120,10 @@ export const useOrders = () => {
       } else {
         setOrders([]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error loading orders",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
     } finally {
@@ -195,10 +195,10 @@ export const useOrders = () => {
 
       fetchOrders();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error placing order",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
       return false;
@@ -221,10 +221,10 @@ export const useOrders = () => {
 
       fetchOrders();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error updating order",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
       return false;

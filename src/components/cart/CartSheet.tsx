@@ -113,11 +113,11 @@ const CartSheet = () => {
       });
 
       navigate("/buyer/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Checkout error:", error);
       toast({
         title: "Checkout failed",
-        description: error.message || "Something went wrong",
+        description: (error as Error).message || "Something went wrong",
         variant: "destructive",
       });
     } finally {

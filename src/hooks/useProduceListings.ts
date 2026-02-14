@@ -49,10 +49,10 @@ export const useProduceListings = () => {
 
       if (error) throw error;
       setListings(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error fetching listings",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
     } finally {
@@ -88,13 +88,13 @@ export const useProduceListings = () => {
         description: `${input.name} has been added to your listings.`,
       });
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error creating listing",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
   };
 
@@ -117,13 +117,13 @@ export const useProduceListings = () => {
         description: "Your changes have been saved.",
       });
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error updating listing",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
   };
 
@@ -142,18 +142,18 @@ export const useProduceListings = () => {
         description: "The listing has been removed.",
       });
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error deleting listing",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
-      return { error };
+      return { error: error as Error };
     }
   };
 
   const toggleAvailability = async (id: string, isAvailable: boolean) => {
-    return updateListing(id, { is_available: isAvailable } as any);
+    return updateListing(id, { is_available: isAvailable });
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
@@ -174,10 +174,10 @@ export const useProduceListings = () => {
         .getPublicUrl(fileName);
 
       return data.publicUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error uploading image",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
       return null;

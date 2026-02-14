@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +31,7 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
 
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -86,16 +86,16 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
       } else {
         setListings([]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error loading marketplace",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [options.category, options.search, toast]);
 
   const fetchCategories = async () => {
     try {
@@ -115,7 +115,7 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
 
   useEffect(() => {
     fetchListings();
-  }, [options.category, options.search, user]);
+  }, [fetchListings]);
 
   useEffect(() => {
     fetchCategories();
