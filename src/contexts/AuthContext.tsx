@@ -4,8 +4,7 @@
  import { AppRole, AuthContextType } from "./auth-types";
  import { AuthContext } from "./auth-context-definition"; // RESTORED AuthContext import
  
-// Define AuthContext locally as its import was removed // REMOVED THIS LINE
-// export const AuthContext = createContext<AuthContextType | undefined>(undefined); // REMOVED THIS LINE
+
  
  export const AuthProvider = ({ children }: { children: ReactNode }) => {
 //   const [user, setUser] = useState<User | null>(null); // Supabase removed
