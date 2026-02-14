@@ -6,7 +6,7 @@ export const supabase = {
     signInWithPassword: vi.fn(() => ({ data: {}, error: null })),
     signUp: vi.fn(() => ({ data: {}, error: null })),
     signOut: vi.fn(() => ({ error: null })),
-    onAuthStateChange: vi.fn(() => ({ subscription: { unsubscribe: vi.fn() } })),
+    onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
     getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
     getUser: vi.fn(() => ({ data: { user: null } })),
   },
