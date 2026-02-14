@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth-context-definition";
 import { useOrders } from "@/hooks/useOrders";
 import OrderCard from "@/components/orders/OrderCard";
 import { Button } from "@/components/ui/button";
