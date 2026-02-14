@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -52,7 +52,7 @@ export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -129,7 +129,7 @@ export const useOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   const createOrder = async (input: CreateOrderInput): Promise<boolean> => {
     if (!user) return false;
@@ -233,7 +233,7 @@ export const useOrders = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [user]);
+  }, [fetchOrders]);
 
   return {
     orders,

@@ -23,6 +23,9 @@ vi.mock("@/hooks/use-toast", () => ({
   }),
 }));
 
+// Mock the Supabase client
+vi.mock("@/integrations/supabase/client");
+
 describe("Login Page", () => {
   it("should render the login form", () => {
     render(

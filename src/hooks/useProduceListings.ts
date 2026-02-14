@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +36,7 @@ export const useProduceListings = () => {
   const [listings, setListings] = useState<ProduceListing[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -58,7 +58,7 @@ export const useProduceListings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   const createListing = async (input: CreateListingInput) => {
     if (!user) return { error: new Error("Not authenticated") };
@@ -186,7 +186,7 @@ export const useProduceListings = () => {
 
   useEffect(() => {
     fetchListings();
-  }, [user]);
+  }, [fetchListings]);
 
   return {
     listings,
