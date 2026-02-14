@@ -2,10 +2,10 @@
 // import { User, Session } from "@supabase/supabase-js"; // Supabase removed
 // import { supabase } from "@/integrations/supabase/client"; // Supabase removed
  import { AppRole, AuthContextType } from "./auth-types";
-// import { AuthContext, useAuth } from "./auth-context-definition"; // AuthContext is defined later, remove import to avoid circular dependency
+ import { AuthContext } from "./auth-context-definition"; // RESTORED AuthContext import
  
-// Define AuthContext locally as its import was removed
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Define AuthContext locally as its import was removed // REMOVED THIS LINE
+// export const AuthContext = createContext<AuthContextType | undefined>(undefined); // REMOVED THIS LINE
  
  export const AuthProvider = ({ children }: { children: ReactNode }) => {
 //   const [user, setUser] = useState<User | null>(null); // Supabase removed
