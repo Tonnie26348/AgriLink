@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { MarketplaceListing } from "@/hooks/useMarketplace";
 import { useOrders } from "@/hooks/useOrders";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth-context-definition";
 import {
   Dialog,
   DialogContent,
