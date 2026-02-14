@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context-definition";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/contexts/cart-context-definition";
 import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
 import OrderDialog from "@/components/marketplace/OrderDialog";
 import ProduceCardSkeleton from "@/components/marketplace/ProduceCardSkeleton";
