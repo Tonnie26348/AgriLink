@@ -4,6 +4,8 @@
  import { AppRole, AuthContextType } from "./auth-types";
 // import { AuthContext, useAuth } from "./auth-context-definition"; // AuthContext is defined later, remove import to avoid circular dependency
  
+// Define AuthContext locally as its import was removed
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
  
  export const AuthProvider = ({ children }: { children: ReactNode }) => {
 //   const [user, setUser] = useState<User | null>(null); // Supabase removed
@@ -11,9 +13,9 @@
 //   const [userRole, setUserRole] = useState<AppRole | null>(null); // Supabase removed
 //   const [loading, setLoading] = useState(true); // Supabase removed
 
-  // Mock states as Supabase is removed
-  const [user, setUser] = useState<any | null>(null);
-  const [session, setSession] = useState<any | null>(null);
+  // Mock states as Supabase is removed, using unknown for types
+  const [user, setUser] = useState<unknown | null>(null);
+  const [session, setSession] = useState<unknown | null>(null);
   const [userRole, setUserRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(false); // No loading as no external auth
  
