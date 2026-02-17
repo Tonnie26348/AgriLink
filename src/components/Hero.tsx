@@ -15,8 +15,8 @@ const Hero = () => {
 
       {/* Content */}
       <div className="container mx-auto relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Left Column - Text Content */}
+        <div className="max-w-3xl mx-auto text-center">
+          {/* Main Content Block */}
           <div className="text-primary-foreground">
             <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-2 mb-6 animate-fade-in">
               <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
@@ -30,13 +30,13 @@ const Hero = () => {
               <span className="block text-secondary">Market Directly</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-xl animate-fade-in delay-200 opacity-0">
+            <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-xl mx-auto animate-fade-in delay-200 opacity-0">
               AgriLink bridges farmers and buyers with transparent pricing, 
               AI-powered insights, and direct trade — eliminating middlemen 
               and maximizing your profits.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in delay-300 opacity-0">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in delay-300 opacity-0">
               <Button variant="hero" size="xl">
                 Start Selling
                 <ArrowRight className="w-5 h-5" />
@@ -47,10 +47,10 @@ const Hero = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fade-in delay-400 opacity-0">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fade-in delay-400 opacity-0 max-w-2xl mx-auto">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center sm:text-left">
-                  <stat.icon className="w-6 h-6 text-secondary mb-2 mx-auto sm:mx-0" />
+                <div key={index} className="text-center">
+                  <stat.icon className="w-6 h-6 text-secondary mb-2 mx-auto" />
                   <div className="text-2xl md:text-3xl font-bold text-primary-foreground">
                     {stat.value}
                   </div>
@@ -60,17 +60,6 @@ const Hero = () => {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* NEW: Right Column - Prominent Visual Placeholder */}
-          <div className="hidden lg:flex items-center justify-center animate-fade-in delay-500 opacity-0">
-            <div className="relative w-full max-w-md aspect-square bg-gradient-to-br from-primary/20 to-accent/20 rounded-[3rem] shadow-elevated border-4 border-card p-6 flex items-center justify-center overflow-hidden">
-                {/* Abstract background elements */}
-                <div className="absolute w-48 h-48 bg-primary/30 rounded-full -top-12 -left-12 blur-2xl opacity-70" />
-                <div className="absolute w-32 h-32 bg-secondary/30 rounded-full -bottom-8 -right-8 blur-2xl opacity-70" />
-
-                                            <div className="text-center relative z-10">
-                                            </div>            </div>
           </div>
         </div>
       </div>
