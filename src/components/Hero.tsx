@@ -9,7 +9,7 @@ const Hero = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex overflow-hidden">
+    <section className="relative min-h-screen flex overflow-hidden pb-32">
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0 bg-gradient-hero" />
 
