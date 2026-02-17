@@ -9,7 +9,7 @@ const AIInsights = () => {
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
 
-      <div className="container mx-auto px-4 relative z-10 text-center"> {/* Added text-center */}
+      <div className="container mx-auto relative z-10 text-center"> {/* Added text-center */}
         <div className="max-w-3xl mx-auto"> {/* Max-width and auto margins for centering */}
           <div> {/* This was the 'Left Column - Content' */}
             <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-semibold mb-4">

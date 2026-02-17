@@ -22,7 +22,7 @@ const steps = [
 const HowItWorks = () => {
   return (
     <section id="how-it-works" className="py-20 md:py-28 bg-muted/50">
-      <div className="container mx-auto px-4 text-center">
+      <div className="container mx-auto text-center">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-1.5 bg-secondary/20 text-secondary-foreground rounded-full text-sm font-semibold mb-4">

@@ -23,7 +23,7 @@ const featureList = [
 const Features = () => {
     return (
       <section id="features" className="py-20 md:py-28 bg-background">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto text-center">
           {/* Section Header */}
           <div className="max-w-3xl mx-auto mb-16">
             <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-semibold mb-4">

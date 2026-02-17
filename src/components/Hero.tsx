@@ -14,7 +14,7 @@ const Hero = () => {
       <div className="absolute inset-0 z-0 bg-gradient-hero" />
 
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left Column - Text Content */}
           <div className="text-primary-foreground">
@@ -70,7 +70,7 @@ const Hero = () => {
                 <div className="absolute w-32 h-32 bg-secondary/30 rounded-full -bottom-8 -right-8 blur-2xl opacity-70" />
 
                                             <div className="text-center relative z-10">
-                                                <p className="text-primary-foreground/60 text-xs">(Engaging app screenshot or illustration here)</p>
+                                                <p className="text-primary-foreground/60 text-[0.6rem]">(Engaging app screenshot or illustration here)</p>
                                             </div>            </div>
           </div>
         </div>

@@ -18,7 +18,7 @@ const Impact = () => {
         <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_80%,_white_0%,_transparent_50%)]" />
       </div>
 
-      <div className="container mx-auto px-4 text-center relative z-10">
+      <div className="container mx-auto text-center relative z-10">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 text-primary-foreground rounded-full text-sm font-semibold mb-4">

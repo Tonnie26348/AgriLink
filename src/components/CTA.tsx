@@ -4,7 +4,7 @@ import { ArrowRight, Leaf } from "lucide-react";
 const CTA = () => {
   return (
     <section className="py-20 md:py-28 bg-background">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           {/* Icon */}
           <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-8 animate-pulse-glow">
