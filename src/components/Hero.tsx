@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, TrendingUp, Shield } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
 
 const Hero = () => {
   const stats = [
@@ -10,17 +9,9 @@ const Hero = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={heroBg}
-          alt="Kenyan farmland"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/85 to-primary/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/50 to-transparent" />
-      </div>
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Background Gradient */}
+      <div className="absolute inset-0 z-0 bg-gradient-hero" />
 
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10">
@@ -34,18 +25,18 @@ const Hero = () => {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 animate-fade-in [animation-delay:100ms] opacity-0">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 animate-fade-in delay-100 opacity-0">
               Connect Farm to
               <span className="block text-secondary">Market Directly</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-xl animate-fade-in [animation-delay:200ms] opacity-0">
+            <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-xl animate-fade-in delay-200 opacity-0">
               AgriLink bridges farmers and buyers with transparent pricing, 
               AI-powered insights, and direct trade — eliminating middlemen 
               and maximizing your profits.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in [animation-delay:300ms] opacity-0">
+            <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in delay-300 opacity-0">
               <Button variant="hero" size="xl">
                 Start Selling
                 <ArrowRight className="w-5 h-5" />
@@ -56,7 +47,7 @@ const Hero = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 animate-fade-in [animation-delay:400ms] opacity-0">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fade-in delay-400 opacity-0">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center sm:text-left">
                   <stat.icon className="w-6 h-6 text-secondary mb-2 mx-auto sm:mx-0" />
@@ -72,7 +63,7 @@ const Hero = () => {
           </div>
 
           {/* Right Column - Visual Element */}
-          <div className="hidden lg:block animate-fade-in [animation-delay:300ms] opacity-0">
+          <div className="hidden lg:block animate-fade-in delay-300 opacity-0">
             <div className="relative">
               {/* Floating Card 1 */}
               <div className="absolute -top-4 -left-8 bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated animate-float z-10">
@@ -88,7 +79,7 @@ const Hero = () => {
               </div>
 
               {/* Floating Card 2 */}
-              <div className="absolute -bottom-4 -right-4 bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated animate-float [animation-delay:1s] z-10">
+              <div className="absolute -bottom-4 -right-4 bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated animate-float delay-1000 z-10">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center">
                     <Users className="w-6 h-6 text-secondary" />

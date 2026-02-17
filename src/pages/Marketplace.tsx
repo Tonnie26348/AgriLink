@@ -6,7 +6,6 @@ import { useCart } from "@/contexts/cart-context-definition";
 import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
 import OrderDialog from "@/components/marketplace/OrderDialog";
 import ProduceCardSkeleton from "@/components/marketplace/ProduceCardSkeleton";
-import CartSheet from "@/components/cart/CartSheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -84,36 +83,7 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b border-border sticky top-0 z-40">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-display font-bold">
-              Agri<span className="text-primary">Link</span>
-            </span>
-          </Link>
 
-          <div className="flex items-center gap-3">
-            <CartSheet />
-            {user && userRole === "buyer" && (
-              <Link to="/buyer/dashboard">
-                <Button variant="ghost">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Dashboard
-                </Button>
-              </Link>
-            )}
-            {!user && (
-              <Link to="/login">
-                <Button>Sign In</Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
 
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}

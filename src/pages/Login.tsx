@@ -47,22 +47,9 @@ import { useState, useEffect } from "react";
    };
  
    return (
-     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+     <div className="min-h-screen bg-background flex items-center justify-center px-4 pt-16">
        <div className="w-full max-w-md">
-         {/* Logo */}
-         <div className="text-center mb-8">
-           <Link to="/" className="inline-flex items-center gap-2 group">
-             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-soft group-hover:shadow-glow transition-shadow duration-300">
-               <Leaf className="w-7 h-7 text-primary-foreground" />
-             </div>
-             <span className="text-2xl font-display font-bold text-foreground">
-               Agri<span className="text-primary">Link</span>
-             </span>
-           </Link>
-         </div>
- 
-         {/* Login Card */}
-         <div className="bg-card rounded-2xl shadow-elevated p-8 border border-border">
+                  {/* Login Card */}         <div className="bg-card rounded-2xl shadow-elevated p-8 border border-border">
            <h1 className="text-2xl font-display font-bold text-foreground text-center mb-2">
              Welcome Back
            </h1>

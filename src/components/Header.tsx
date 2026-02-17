@@ -3,17 +3,19 @@
 import { Button } from "@/components/ui/button";
  import { Menu, X, Leaf, LogOut, Tractor, ShoppingBag } from "lucide-react";
  import { useAuth } from "@/contexts/auth-context-definition";
+ import CartSheet from "@/components/cart/CartSheet";
 
-const Navbar = () => {
+const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
    const { user, userRole, signOut } = useAuth();
    const navigate = useNavigate();
 
   const navLinks = [
-    { label: "Features", href: "#features" },
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "AI Insights", href: "#ai-insights" },
-    { label: "Impact", href: "#impact" },
+    { label: "Features", to: "/#features" },
+    { label: "How It Works", to: "/#how-it-works" },
+    { label: "AI Insights", to: "/#ai-insights" },
+    { label: "Impact", to: "/#impact" },
+    { label: "Marketplace", to: "/marketplace" },
   ];
 
    const handleSignOut = async () => {
@@ -38,18 +40,19 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
-                href={link.href}
+                to={link.to}
                 className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-200"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
+             <CartSheet />
              {user ? (
                <>
                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
@@ -62,6 +65,9 @@ const Navbar = () => {
                      {userRole || "User"}
                    </span>
                  </div>
+                 <Link to={userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard"}>
+                  <Button variant="ghost">Dashboard</Button>
+                 </Link>
                  <Button variant="ghost" onClick={handleSignOut}>
                    <LogOut className="w-4 h-4 mr-2" />
                    Log Out
@@ -94,15 +100,18 @@ const Navbar = () => {
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.label}
-                  href={link.href}
+                  to={link.to}
                   className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg font-medium transition-all duration-200"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
+              <div className="pt-4 px-4 border-t border-border mt-2">
+                 <CartSheet />
+              </div>
               <div className="flex flex-col gap-2 pt-4 px-4 border-t border-border mt-2">
                  {user ? (
                    <>
@@ -116,6 +125,9 @@ const Navbar = () => {
                          {userRole || "User"}
                        </span>
                      </div>
+                     <Link to={userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard"}>
+                       <Button variant="ghost" className="w-full justify-center">Dashboard</Button>
+                     </Link>
                      <Button variant="ghost" className="w-full justify-center" onClick={handleSignOut}>
                        <LogOut className="w-4 h-4 mr-2" />
                        Log Out
@@ -140,4 +152,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Header;

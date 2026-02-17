@@ -44,52 +44,8 @@ const BuyerDashboard = () => {
   ];
  
    return (
-     <div className="min-h-screen bg-muted/30">
-       {/* Header */}
-       <header className="bg-background border-b border-border sticky top-0 z-40">
-         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-           <Link to="/" className="flex items-center gap-2">
-             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-               <Leaf className="w-6 h-6 text-primary-foreground" />
-             </div>
-             <span className="text-xl font-display font-bold">
-               Agri<span className="text-primary">Link</span>
-             </span>
-           </Link>
- 
-           {/* Search Bar */}
-           <div className="hidden md:flex flex-1 max-w-md mx-8">
-             <div className="relative w-full">
-               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-               <Input
-                 placeholder="Search for produce, farmers..."
-                 value={searchQuery}
-                 onChange={(e) => setSearchQuery(e.target.value)}
-                 className="pl-10"
-               />
-             </div>
-           </div>
-           
-           <div className="flex items-center gap-4">
-             <Button variant="ghost" size="icon" className="relative">
-               <ShoppingCart className="w-5 h-5" />
-               <span className="absolute -top-1 -right-1 w-5 h-5 bg-secondary text-secondary-foreground text-xs rounded-full flex items-center justify-center">
-                 4
-               </span>
-             </Button>
-             <Button variant="ghost" size="icon">
-               <Bell className="w-5 h-5" />
-             </Button>
-             <Button variant="ghost" size="icon">
-               <Settings className="w-5 h-5" />
-             </Button>
-             <Button variant="ghost" onClick={signOut}>
-               <LogOut className="w-4 h-4 mr-2" />
-               Logout
-             </Button>
-           </div>
-         </div>
-       </header>
+     <div className="min-h-screen bg-muted/30 pt-16">
+
  
        <main className="container mx-auto px-4 py-8">
          {/* Welcome Section */}

@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FarmerDashboard from "@/pages/farmer/FarmerDashboard";
 import BuyerDashboard from "@/pages/buyer/BuyerDashboard";
+import Header from "@/components/Header";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter basename="/AgriLink">
+            <Header />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
