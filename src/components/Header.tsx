@@ -4,17 +4,20 @@ import { Button } from "@/components/ui/button";
  import { Menu, X, Leaf, LogOut, Tractor, ShoppingBag } from "lucide-react";
  import { useAuth } from "@/contexts/auth-context-definition";
  import CartSheet from "@/components/cart/CartSheet";
+ import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
    const { user, userRole, signOut } = useAuth();
    const navigate = useNavigate();
+   const scrollToSection = useScrollToSection();
 
   const navLinks = [
-    { label: "Features", to: "/#features" },
-    { label: "How It Works", to: "/#how-it-works" },
-    { label: "AI Insights", to: "/#ai-insights" },
-    { label: "Impact", to: "/#impact" },
+    { label: "Home", to: "/" },
+    { label: "Features", to: "/features" },
+    { label: "How It Works", to: "/how-it-works" },
+    { label: "AI Insights", to: "/ai-insights" },
+    { label: "Impact", to: "/impact" },
     { label: "Marketplace", to: "/marketplace" },
   ];
 
@@ -39,15 +42,33 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={link.to}
-                className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-200"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              if (link.to.startsWith("/#")) {
+                const sectionId = link.to.substring(2);
+                return (
+                  <a
+                    key={link.label}
+                    href={link.to}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      scrollToSection(sectionId);
+                    }}
+                    className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-200"
+                  >
+                    {link.label}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-200"
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* CTA Buttons */}
@@ -99,16 +120,35 @@ const Header = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg font-medium transition-all duration-200"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                if (link.to.startsWith("/#")) {
+                  const sectionId = link.to.substring(2);
+                  return (
+                    <a
+                      key={link.label}
+                      href={link.to}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        scrollToSection(sectionId);
+                        setIsOpen(false);
+                      }}
+                      className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg font-medium transition-all duration-200"
+                    >
+                      {link.label}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.label}
+                    to={link.to}
+                    className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg font-medium transition-all duration-200"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               <div className="pt-4 px-4 border-t border-border mt-2">
                  <CartSheet />
               </div>

@@ -13,6 +13,10 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FarmerDashboard from "@/pages/farmer/FarmerDashboard";
 import BuyerDashboard from "@/pages/buyer/BuyerDashboard";
+import AIInsightsPage from "./pages/AIInsightsPage";
+import FeaturesPage from "./pages/FeaturesPage";
+import HowItWorksPage from "./pages/HowItWorksPage";
+import ImpactPage from "./pages/ImpactPage";
 import Header from "@/components/Header";
 
 const queryClient = new QueryClient();
@@ -31,6 +35,10 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/ai-insights" element={<AIInsightsPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/impact" element={<ImpactPage />} />
               <Route
                 path="/farmer/dashboard"
                 element={

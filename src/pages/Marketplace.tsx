@@ -82,7 +82,7 @@ const Marketplace = () => {
   const allCategories = ["All", ...categories];
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pt-16">
 
 
       <main className="container mx-auto px-4 py-8">

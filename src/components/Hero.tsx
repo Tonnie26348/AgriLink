@@ -65,40 +65,11 @@ const Hero = () => {
           {/* Right Column - Visual Element */}
           <div className="hidden lg:block animate-fade-in delay-300 opacity-0">
             <div className="relative">
-              {/* Floating Card 1 */}
-              <div className="absolute -top-4 -left-8 bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated animate-float z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Today's Best Price</p>
-                    <p className="text-lg font-bold text-foreground">KES 45/kg</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Card 2 */}
-              <div className="absolute -bottom-4 -right-4 bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated animate-float delay-1000 z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-secondary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Active Buyers</p>
-                    <p className="text-lg font-bold text-foreground">2,847</p>
-                  </div>
-                </div>
-              </div>
-
               {/* Main Phone Mockup Placeholder */}
-              <div className="w-80 h-[500px] mx-auto bg-gradient-to-br from-card to-muted rounded-[3rem] shadow-elevated border-8 border-card p-4 flex items-center justify-center">
+              <div className="w-40 h-[250px] mx-auto bg-gradient-to-br from-card to-muted rounded-[2rem] shadow-elevated border-4 border-card p-2 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                    <TrendingUp className="w-8 h-8 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground font-medium">AgriLink App</p>
-                  <p className="text-sm text-muted-foreground/70">Coming Soon</p>
+                  <p className="text-muted-foreground font-medium text-sm">AgriLink App</p>
+                  <p className="text-xs text-muted-foreground/70">Coming Soon</p>
                 </div>
               </div>
             </div>
