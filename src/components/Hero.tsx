@@ -70,7 +70,6 @@ const Hero = () => {
                 <div className="absolute w-32 h-32 bg-secondary/30 rounded-full -bottom-8 -right-8 blur-2xl opacity-70" />
 
                                             <div className="text-center relative z-10">
-                                                <p className="text-primary-foreground/60 text-[0.6rem]">(Engaging app screenshot or illustration here)</p>
                                             </div>            </div>
           </div>
         </div>
