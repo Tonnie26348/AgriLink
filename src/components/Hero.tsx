@@ -17,7 +17,7 @@ const Hero = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left Column - Text Content */}
-          <div className="text-primary-foreground lg:col-span-1">
+          <div className="text-primary-foreground">
             <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-2 mb-6 animate-fade-in">
               <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
               <span className="text-sm font-medium">
@@ -61,10 +61,22 @@ const Hero = () => {
               ))}
             </div>
           </div>
+
+          {/* NEW: Right Column - Prominent Visual Placeholder */}
+          <div className="hidden lg:flex items-center justify-center animate-fade-in delay-500 opacity-0">
+            <div className="relative w-full max-w-md aspect-square bg-gradient-to-br from-primary/20 to-accent/20 rounded-[3rem] shadow-elevated border-4 border-card p-6 flex items-center justify-center overflow-hidden">
+                {/* Abstract background elements */}
+                <div className="absolute w-48 h-48 bg-primary/30 rounded-full -top-12 -left-12 blur-2xl opacity-70" />
+                <div className="absolute w-32 h-32 bg-secondary/30 rounded-full -bottom-8 -right-8 blur-2xl opacity-70" />
+
+                                            <div className="text-center relative z-10">
+                                                <p className="text-primary-foreground/60 text-xs">(Engaging app screenshot or illustration here)</p>
+                                            </div>            </div>
+          </div>
         </div>
       </div>
 
-      {/* NEW: AgriLink App Coming Soon - Small and Upper Right */}
+      {/* NEW: AgriLink App Coming Soon - Small and Upper Right (Absolute) */}
       <div className="absolute top-4 right-4 z-20 p-2 bg-card/80 backdrop-blur-sm rounded-lg shadow-md text-center hidden md:block">
         <p className="text-muted-foreground text-xs font-medium">AgriLink App</p>
         <p className="text-muted-foreground/70 text-xxs">Coming Soon</p>
