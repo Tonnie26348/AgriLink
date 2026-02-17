@@ -1,4 +1,4 @@
-import { Bot, TrendingUp, Calendar, Target, Users } from "lucide-react";
+import { Bot, TrendingUp, Calendar, Target, Users, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const insights = [
@@ -22,9 +22,24 @@ const insights = [
   },
 ];
 
+const keyMetrics = [
+  {
+    icon: DollarSign,
+    title: "Today's Best Price",
+    value: "KES 45/kg",
+    description: "AI-suggested optimal price for your produce.",
+  },
+  {
+    icon: Users,
+    title: "Active Buyers",
+    value: "2,847",
+    description: "Number of potential buyers currently seeking produce.",
+  },
+];
+
 const AIInsightsPage = () => {
   return (
-    <section className="py-20 md:py-28 bg-background relative overflow-hidden pt-16"> {/* Added pt-16 */}
+    <section className="py-20 md:py-28 bg-background relative overflow-hidden pt-16">
       {/* Background Decorations */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
@@ -37,12 +52,12 @@ const AIInsightsPage = () => {
               <Bot className="w-4 h-4" />
               AI-Powered
             </span>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-6"> {/* Changed h2 to h1 */}
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-6">
               Smart Insights,
               <span className="text-primary"> Better Decisions</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Our AI analyzes market trends, seasonal patterns, and historical data to provide 
+              Our AI analyzes market trends, seasonal patterns, and historical data to provide
               actionable insights. You stay in control — the AI advises, you decide.
             </p>
 
@@ -54,7 +69,7 @@ const AIInsightsPage = () => {
                 <div>
                   <p className="text-foreground font-medium mb-1">How it works:</p>
                   <p className="text-muted-foreground text-sm">
-                    The AI module is advisory only — farmers retain full control over their 
+                    The AI module is advisory only — farmers retain full control over their
                     pricing decisions. As more data is collected, predictions become more accurate.
                   </p>
                 </div>
@@ -66,58 +81,63 @@ const AIInsightsPage = () => {
             </Button>
           </div>
 
-          {/* Right Column - Insight Cards */}
-          <div className="space-y-5">
-            {/* Floating Card 1 */}
-            <div className="relative bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Today's Best Price</p>
-                  <p className="text-lg font-bold text-foreground">KES 45/kg</p>
-                </div>
+          {/* Right Column - Structured Insights */}
+          <div className="space-y-8">
+            {/* Key Metrics Section */}
+            <div>
+              <h2 className="text-2xl font-display font-bold text-foreground mb-4">Key Metrics</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {keyMetrics.map((metric, index) => (
+                  <div
+                    key={index}
+                    className="bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated z-10 flex items-center gap-3"
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 
+                      ${metric.icon === DollarSign ? 'bg-primary/10' : 'bg-secondary/20'}`}
+                    >
+                      <metric.icon className={`w-6 h-6 
+                        ${metric.icon === DollarSign ? 'text-primary' : 'text-secondary'}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{metric.title}</p>
+                      <p className="text-lg font-bold text-foreground">{metric.value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Floating Card 2 */}
-            <div className="relative bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Active Buyers</p>
-                  <p className="text-lg font-bold text-foreground">2,847</p>
-                </div>
-              </div>
-            </div>
-            {insights.map((insight, index) => (
-              <div
-                key={index}
-                className="bg-card rounded-2xl p-6 shadow-soft border border-border/50 hover:shadow-elevated transition-all duration-300 group"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                    <insight.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-display font-bold text-foreground mb-2">
-                      {insight.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
-                      {insight.description}
-                    </p>
-                    <div className="bg-muted/70 rounded-lg px-4 py-2">
-                      <p className="text-sm font-mono text-foreground">
-                        {insight.sample}
-                      </p>
+            {/* Detailed Insights Section */}
+            <div>
+              <h2 className="text-2xl font-display font-bold text-foreground mb-4">Detailed Insights</h2>
+              <div className="space-y-5">
+                {insights.map((insight, index) => (
+                  <div
+                    key={index}
+                    className="bg-card rounded-2xl p-6 shadow-soft border border-border/50 hover:shadow-elevated transition-all duration-300 group"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                        <insight.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-display font-bold text-foreground mb-2">
+                          {insight.title}
+                        </h3>
+                        <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
+                          {insight.description}
+                        </p>
+                        <div className="bg-muted/70 rounded-lg px-4 py-2">
+                          <p className="text-sm font-mono text-foreground">
+                            {insight.sample}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
