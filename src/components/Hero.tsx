@@ -78,8 +78,8 @@ const Hero = () => {
 
       {/* NEW: AgriLink App Coming Soon - Small and Upper Right (Absolute) */}
       <div className="absolute top-4 right-4 z-20 p-2 bg-card/80 backdrop-blur-sm rounded-lg shadow-md text-center hidden md:block">
-        <p className="text-muted-foreground text-xs font-medium">AgriLink App</p>
-        <p className="text-muted-foreground/70 text-xxs">Coming Soon</p>
+        <p className="text-muted-foreground text-[10px] font-medium">AgriLink App</p>
+        <p className="text-muted-foreground/70 text-[8px]">Coming Soon</p>
       </div>
 
       {/* Bottom Wave */}
