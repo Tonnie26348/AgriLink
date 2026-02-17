@@ -1,5 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Package, DollarSign, Sprout } from "lucide-react";
+
+const featureList = [
+  {
+    icon: Package,
+    title: "Direct Market Access",
+    description: "Connect directly with buyers and sellers, cutting out intermediaries to maximize profits for farmers and get fresh produce for buyers."
+  },
+  {
+    icon: DollarSign,
+    title: "Transparent Pricing",
+    description: "Access real-time market data and AI-driven price predictions, ensuring fair and equitable pricing for all transactions."
+  },
+  {
+    icon: Sprout,
+    title: "Sustainable Practices",
+    description: "Support and promote environmentally friendly farming methods through informed trading decisions and community initiatives."
+  }
+];
 
 const Features = () => {
   return (
@@ -23,6 +42,19 @@ const Features = () => {
               Explore All Features
             </Button>
           </Link>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+          {featureList.map((feature, index) => (
+            <div key={index} className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-left hover:shadow-elevated transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <feature.icon className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-display font-bold text-foreground mb-3">{feature.title}</h3>
+              <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

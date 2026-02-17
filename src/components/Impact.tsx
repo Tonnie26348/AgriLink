@@ -1,5 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Users, TrendingUp, DollarSign, Seed } from "lucide-react";
+
+const impactMetrics = [
+  { icon: Users, value: "10K+", label: "Farmers Empowered" },
+  { icon: TrendingUp, value: "40%", label: "Average Income Increase" },
+  { icon: DollarSign, value: "50M+", label: "Value Transacted (KES)" },
+  { icon: Seed, value: "20+", label: "Regions Covered" },
+];
 
 const Impact = () => {
   return (
@@ -29,6 +37,21 @@ const Impact = () => {
               Discover Our Impact
             </Button>
           </Link>
+        </div>
+
+        {/* Impact Metrics Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 text-primary-foreground">
+          {impactMetrics.map((metric, index) => (
+            <div key={index} className="text-center">
+              <metric.icon className="w-10 h-10 text-secondary mb-3 mx-auto" />
+              <div className="text-3xl md:text-4xl font-display font-bold mb-1">
+                {metric.value}
+              </div>
+              <div className="text-sm text-primary-foreground/70">
+                {metric.label}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

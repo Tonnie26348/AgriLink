@@ -66,10 +66,11 @@ const Hero = () => {
           <div className="hidden lg:block animate-fade-in delay-300 opacity-0">
             <div className="relative">
               {/* Main Phone Mockup Placeholder */}
-              <div className="w-40 h-[250px] mx-auto bg-gradient-to-br from-card to-muted rounded-[2rem] shadow-elevated border-4 border-card p-2 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-muted-foreground font-medium text-sm">AgriLink App</p>
-                  <p className="text-xs text-muted-foreground/70">Coming Soon</p>
+              <div className="relative w-full h-full min-h-[300px] lg:min-h-[400px] flex items-center justify-center bg-gradient-to-br from-card to-muted rounded-[2rem] shadow-elevated border-4 border-card p-4">
+                <div className="text-center p-4">
+                  <p className="text-muted-foreground font-medium text-lg">AgriLink App</p>
+                  <p className="text-sm text-muted-foreground/70">Coming Soon</p>
+                  <p className="text-xs text-muted-foreground/50 mt-2">(Placeholder for app screenshot/illustration)</p>
                 </div>
               </div>
             </div>
