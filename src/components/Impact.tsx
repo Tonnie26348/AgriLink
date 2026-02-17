@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Users, TrendingUp, DollarSign, Seed } from "lucide-react";
+import { Users, TrendingUp, DollarSign, Leaf } from "lucide-react"; // Changed Seed to Leaf
 
 const impactMetrics = [
   { icon: Users, value: "10K+", label: "Farmers Empowered" },
   { icon: TrendingUp, value: "40%", label: "Average Income Increase" },
   { icon: DollarSign, value: "50M+", label: "Value Transacted (KES)" },
-  { icon: Seed, value: "20+", label: "Regions Covered" },
+  { icon: Leaf, value: "20+", label: "Regions Covered" }, // Changed Seed to Leaf
 ];
 
 const Impact = () => {
