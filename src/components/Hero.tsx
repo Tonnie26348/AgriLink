@@ -9,7 +9,7 @@ const Hero = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex overflow-hidden pb-32">
+    <section className="relative min-h-screen flex items-center justify-center py-24 md:py-36 overflow-hidden pb-32">
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0 bg-gradient-hero" />
 
@@ -25,7 +25,7 @@ const Hero = () => {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 animate-fade-in delay-100 opacity-0">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-display font-bold leading-tight mb-6 animate-fade-in delay-100 opacity-0">
               Connect Farm to
               <span className="block text-secondary">Market Directly</span>
             </h1>
