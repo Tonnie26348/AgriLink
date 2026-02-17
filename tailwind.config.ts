@@ -7,9 +7,11 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "3rem", // Increased from 2rem to 3rem
+      padding: "3rem",
       screens: {
-        "2xl": "1400px",
+        lg: "1100px", // Custom wider than default (1024px)
+        xl: "1350px", // Custom wider than default (1280px)
+        "2xl": "1600px", // Custom wider than default (1400px was custom, now even wider)
       },
     },
     extend: {
