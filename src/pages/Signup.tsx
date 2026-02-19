@@ -23,14 +23,13 @@ import { useState, useEffect } from "react";
     const navigate = useNavigate();
     const { toast } = useToast();
   
-   // Redirect after successful signup and role assignment (for auto-confirm)
-   useEffect(() => {
-     if (userRole) {
-       const redirectPath = userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard";
-       navigate(redirectPath);
-     }
-   }, [userRole, navigate]);
- 
+     // Redirect after successful signup and role assignment (for auto-confirm)
+     useEffect(() => {
+       if (userRole) {
+         const redirectPath = userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard";
+         navigate(redirectPath, { replace: true });
+       }
+     }, [userRole, navigate]); 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       

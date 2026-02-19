@@ -22,7 +22,7 @@ import Footer from "@/components/Footer";
   useEffect(() => {
     if (userRole) {
       const redirectPath = userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard";
-      navigate(redirectPath);
+      navigate(redirectPath, { replace: true });
     }
   }, [userRole, navigate]);
 
