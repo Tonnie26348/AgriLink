@@ -16,9 +16,30 @@ vi.mock("@/contexts/auth-context-definition", () => ({
 // Mock the AuthProvider component entirely to avoid importing it
 const MockAuthProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
-// Mock the module that exports AuthProvider
+// Mock the CartProvider component entirely to avoid importing it
+const MockCartProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+// Mock the providers
 vi.mock("@/contexts/AuthContext", () => ({
   AuthProvider: MockAuthProvider,
+}));
+
+vi.mock("@/contexts/CartContext", () => ({
+  CartProvider: MockCartProvider,
+}));
+
+// Mock the useCart hook
+vi.mock("@/contexts/cart-context-definition", () => ({
+  useCart: () => ({
+    items: [],
+    addItem: vi.fn(),
+    removeItem: vi.fn(),
+    updateQuantity: vi.fn(),
+    clearCart: vi.fn(),
+    getItemCount: () => 0,
+    getTotal: () => 0,
+    getItemsByFarmer: () => new Map(),
+  }),
 }));
 
 // Mock the useToast hook
@@ -33,7 +54,9 @@ describe("Login Page", () => {
     render(
       <MemoryRouter>
         <MockAuthProvider>
-          <Login />
+          <MockCartProvider>
+            <Login />
+          </MockCartProvider>
         </MockAuthProvider>
       </MemoryRouter>
     );
