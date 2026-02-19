@@ -7,6 +7,9 @@ import { useState, useEffect } from "react";
  import { useAuth } from "@/contexts/auth-context-definition";
  import { useToast } from "@/hooks/use-toast";
  
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+ 
  const Login = () => {
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
@@ -47,68 +50,72 @@ import { useState, useEffect } from "react";
    };
  
    return (
-     <div className="min-h-screen bg-background flex items-center justify-center px-4 pt-16">
-       <div className="w-full max-w-md">
-                  {/* Login Card */}         <div className="bg-card rounded-2xl shadow-elevated p-8 border border-border">
-           <h1 className="text-2xl font-display font-bold text-foreground text-center mb-2">
-             Welcome Back
-           </h1>
-           <p className="text-muted-foreground text-center mb-8">
-             Sign in to access your account
-           </p>
- 
-           <form onSubmit={handleSubmit} className="space-y-6">
-             <div className="space-y-2">
-               <Label htmlFor="email">Email</Label>
-               <div className="relative">
-                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                 <Input
-                   id="email"
-                   type="email"
-                   placeholder="you@example.com"
-                   value={email}
-                   onChange={(e) => setEmail(e.target.value)}
-                   className="pl-10"
-                   required
-                 />
+     <div className="min-h-screen bg-background flex flex-col pt-16">
+       <Header />
+       <div className="flex-1 flex items-center justify-center px-4 py-12">
+         <div className="w-full max-w-md">
+                    {/* Login Card */}         <div className="bg-card rounded-2xl shadow-elevated p-8 border border-border">
+             <h1 className="text-2xl font-display font-bold text-foreground text-center mb-2">
+               Welcome Back
+             </h1>
+             <p className="text-muted-foreground text-center mb-8">
+               Sign in to access your account
+             </p>
+   
+             <form onSubmit={handleSubmit} className="space-y-6">
+               <div className="space-y-2">
+                 <Label htmlFor="email">Email</Label>
+                 <div className="relative">
+                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                   <Input
+                     id="email"
+                     type="email"
+                     placeholder="you@example.com"
+                     value={email}
+                     onChange={(e) => setEmail(e.target.value)}
+                     className="pl-10"
+                     required
+                   />
+                 </div>
                </div>
-             </div>
- 
-             <div className="space-y-2">
-               <Label htmlFor="password">Password</Label>
-               <div className="relative">
-                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                 <Input
-                   id="password"
-                   type="password"
-                   placeholder="••••••••"
-                   value={password}
-                   onChange={(e) => setPassword(e.target.value)}
-                   className="pl-10"
-                   required
-                 />
+   
+               <div className="space-y-2">
+                 <Label htmlFor="password">Password</Label>
+                 <div className="relative">
+                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                   <Input
+                     id="password"
+                     type="password"
+                     placeholder="••••••••"
+                     value={password}
+                     onChange={(e) => setPassword(e.target.value)}
+                     className="pl-10"
+                     required
+                   />
+                 </div>
                </div>
-             </div>
- 
-             <Button 
-               type="submit" 
-               className="w-full" 
-               size="lg"
-               disabled={isLoading}
-             >
-               {isLoading ? "Signing in..." : "Sign In"}
-               <ArrowRight className="w-5 h-5" />
-             </Button>
-           </form>
- 
-           <p className="text-center text-muted-foreground mt-6">
-             Don't have an account?{" "}
-             <Link to="/signup" className="text-primary font-semibold hover:underline">
-               Sign up
-             </Link>
-           </p>
+   
+               <Button 
+                 type="submit" 
+                 className="w-full" 
+                 size="lg"
+                 disabled={isLoading}
+               >
+                 {isLoading ? "Signing in..." : "Sign In"}
+                 <ArrowRight className="w-5 h-5" />
+               </Button>
+             </form>
+   
+             <p className="text-center text-muted-foreground mt-6">
+               Don't have an account?{" "}
+               <Link to="/signup" className="text-primary font-semibold hover:underline">
+                 Sign up
+               </Link>
+             </p>
+           </div>
          </div>
        </div>
+       <Footer />
      </div>
    );
  };

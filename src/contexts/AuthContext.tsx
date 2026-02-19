@@ -64,23 +64,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       options: {
         data: {
           full_name: fullName,
+          role: role, // Pass role here so the DB trigger can pick it up
         },
       },
     });
 
     if (error) return { error };
 
-    if (data.user) {
-      // Create user role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: data.user.id,
-          role: role,
-        });
-      
-      if (roleError) return { error: roleError };
-    }
+    // We no longer need to insert into user_roles manually here.
+    // The database trigger 'on_auth_user_created' now handles it.
 
     return { error: null };
   };

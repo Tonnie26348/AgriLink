@@ -40,6 +40,9 @@ const EMOJI_MAP: Record<string, string> = {
   Other: "📦",
 };
 
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
 const Marketplace = () => {
   const { user, userRole } = useAuth();
   const { addItem } = useCart();
@@ -83,7 +86,7 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-muted/30 pt-16">
-
+      <Header />
 
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
@@ -186,6 +189,7 @@ const Marketplace = () => {
         onOpenChange={setOrderDialogOpen}
         onSuccess={refetch}
       />
+      <Footer />
     </div>
   );
 };

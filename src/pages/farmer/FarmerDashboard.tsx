@@ -42,6 +42,52 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/auth-context-definition";
+import { useProduceListings, ProduceListing, CreateListingInput } from "@/hooks/useProduceListings";
+import { useOrders } from "@/hooks/useOrders";
+import OrderCard from "@/components/orders/OrderCard";
+import ProduceListingDialog from "@/components/farmer/ProduceListingDialog";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { PriceInsights } from "@/components/insights/PriceInsights";
+import { 
+  Leaf, 
+  Plus, 
+  Package, 
+  TrendingUp, 
+  DollarSign, 
+  ShoppingCart,
+  Settings,
+  Bell,
+  LogOut,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
+
 const FarmerDashboard = () => {
   const { signOut } = useAuth();
   const { 
@@ -102,7 +148,7 @@ const FarmerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted/30 pt-16">
-
+      <Header />
 
       <main className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
@@ -294,6 +340,10 @@ const FarmerDashboard = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
+
+      {/* Add/Edit Dialog */}
 
       {/* Add/Edit Dialog */}
       <ProduceListingDialog

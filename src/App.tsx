@@ -29,7 +29,6 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter basename="/AgriLink">
-            <Header />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
