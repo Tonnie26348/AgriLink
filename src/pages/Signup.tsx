@@ -50,15 +50,16 @@ import { useState, useEffect } from "react";
          title: "Signup failed",
          description: error.message,
        });
+       setIsLoading(false);
      } else {
        toast({
          title: "Account created!",
-         description: "Please check your email to verify your account.",
+         description: "Welcome to AgriLink! Redirecting to your dashboard...",
        });
-       navigate("/login");
+       
+       // The useEffect above will handle the navigation once userRole is set by AuthContext
+       // We keep isLoading true to show a loading state during this transition
      }
- 
-     setIsLoading(false);
    };
  
    return (
