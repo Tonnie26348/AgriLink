@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-// import { supabase } from "@/integrations/supabase/client"; // Supabase removed
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth-context-definition";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,43 +25,90 @@ interface UseMarketplaceOptions {
 }
 
 export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
-  const { user } = useAuth();
   const { toast } = useToast();
-  // const [listings, setListings] = useState<MarketplaceListing[]>([]); // Supabase removed
-  // const [loading, setLoading] = useState(true); // Supabase removed
-  // const [categories, setCategories] = useState<string[]>([]); // Supabase removed
-
-  // Mock states as Supabase is removed
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
 
-  const fetchListings = useCallback(async () => { // Supabase removed
-    // console.warn("Marketplace listings fetching is disabled as Supabase is removed.");
-    setLoading(false);
-    setListings([]); // Return empty data
-  }, [options.category, options.search, toast]); // Supabase removed
+  const fetchListings = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      let query = supabase
+        .from("produce_listings")
+        .select(`
+          *,
+          profiles:farmer_id (
+            full_name,
+            location
+          )
+        `)
+        .eq("is_available", true)
+        .gt("quantity_available", 0)
+        .order("created_at", { ascending: false });
 
-  const fetchCategories = async () => { // Supabase removed
-    // console.warn("Category fetching is disabled as Supabase is removed.");
-    setCategories([]); // Return empty categories
-  }; // Supabase removed
+      if (options.category && options.category !== "All") {
+        query = query.eq("category", options.category);
+      }
 
-  useEffect(() => { // Supabase removed
-    // Mock useEffect for removed Supabase
-    setLoading(false);
-    setListings([]);
-    setCategories([]);
-  }, [fetchListings]); // Supabase removed
+      if (options.search) {
+        query = query.ilike("name", `%${options.search}%`);
+      }
 
-  useEffect(() => { // Supabase removed
-    // Mock useEffect for removed Supabase
-  }, []); // Supabase removed
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      const formattedListings = (data || []).map((item: any) => ({
+        ...item,
+        farmer_name: item.profiles?.full_name || "Local Farmer",
+        farmer_location: item.profiles?.location || "India",
+      }));
+
+      setListings(formattedListings);
+    } catch (error: any) {
+      console.error("Error fetching marketplace listings:", error);
+      toast({
+        title: "Error fetching listings",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [options.category, options.search, toast]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("produce_listings")
+        .select("category")
+        .eq("is_available", true);
+
+      if (error) throw error;
+
+      const uniqueCategories = Array.from(
+        new Set((data || []).map((item) => item.category))
+      ).sort();
+      
+      setCategories(uniqueCategories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   return {
     listings,
     loading,
     categories,
-    refetch: fetchListings, // Keep refetch available but it does nothing
+    refetch: fetchListings,
   };
 };
