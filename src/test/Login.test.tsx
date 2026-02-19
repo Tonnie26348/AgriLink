@@ -2,19 +2,24 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import Login from "@/pages/Login";
-import { AuthProvider } from "@/contexts/AuthContext"; // Assuming AuthProvider is the correct provider
+import React from "react";
 
-// Mock the useAuth hook
-vi.mock("@/contexts/AuthContext", async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    useAuth: () => ({
-      signIn: vi.fn(),
-      userRole: null,
-    }),
-  };
-});
+// Mock the useAuth hook from the correct definition file
+vi.mock("@/contexts/auth-context-definition", () => ({
+  useAuth: () => ({
+    signIn: vi.fn(),
+    userRole: null,
+    loading: false,
+  }),
+}));
+
+// Mock the AuthProvider component entirely to avoid importing it
+const MockAuthProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+// Mock the module that exports AuthProvider
+vi.mock("@/contexts/AuthContext", () => ({
+  AuthProvider: MockAuthProvider,
+}));
 
 // Mock the useToast hook
 vi.mock("@/hooks/use-toast", () => ({
@@ -23,15 +28,13 @@ vi.mock("@/hooks/use-toast", () => ({
   }),
 }));
 
-
-
 describe("Login Page", () => {
   it("should render the login form", () => {
     render(
       <MemoryRouter>
-        <AuthProvider>
+        <MockAuthProvider>
           <Login />
-        </AuthProvider>
+        </MockAuthProvider>
       </MemoryRouter>
     );
 
