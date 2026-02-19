@@ -1,20 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Hardcoded credentials to ensure they are picked up regardless of .env loading issues
+const SUPABASE_URL = "https://zeyxhvrymjdypgfporuy.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpleXhodnJ5bWpkeXBnZnBvcnV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4ODU4MDgsImV4cCI6MjA4NjQ2MTgwOH0.0hC9nFXyxk-ZPoRwXZQTkVYSGA2bCIo0ZrszdJFNK74";
 
-// Use placeholders only if variables are absolutely missing (e.g., in CI)
-const url = SUPABASE_URL || 'https://placeholder.supabase.co';
-const key = SUPABASE_ANON_KEY || 'placeholder-key';
+console.log("Supabase Client: Initializing with URL", SUPABASE_URL);
 
-// Log for debugging (Remove in production)
-if (url.includes('placeholder')) {
-  console.warn("Supabase client is using placeholder values. Ensure .env is loaded correctly.");
-} else {
-  console.log("Supabase client initialized with URL:", url);
-}
-
-export const supabase = createClient(url, key, {
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
