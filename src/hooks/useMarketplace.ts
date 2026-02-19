@@ -24,6 +24,13 @@ interface UseMarketplaceOptions {
   search?: string;
 }
 
+interface MarketplaceItemResponse extends MarketplaceListing {
+  profiles: {
+    full_name: string | null;
+    location: string | null;
+  } | null;
+}
+
 export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
   const { toast } = useToast();
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -59,18 +66,19 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
 
       if (error) throw error;
 
-      const formattedListings = (data || []).map((item: any) => ({
+      const formattedListings = (data as unknown as MarketplaceItemResponse[] || []).map((item) => ({
         ...item,
         farmer_name: item.profiles?.full_name || "Local Farmer",
         farmer_location: item.profiles?.location || "India",
       }));
 
       setListings(formattedListings);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching marketplace listings:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error fetching listings",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

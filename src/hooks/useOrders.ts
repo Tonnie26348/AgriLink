@@ -46,6 +46,24 @@ export interface CreateOrderInput {
   notes?: string;
 }
 
+interface OrderItemResponse extends OrderItem {
+  produce_listings: {
+    name: string;
+    unit: string;
+    image_url: string | null;
+  } | null;
+}
+
+interface OrderResponse extends Order {
+  order_items: OrderItemResponse[];
+  buyer: {
+    full_name: string | null;
+  } | null;
+  farmer: {
+    full_name: string | null;
+  } | null;
+}
+
 export const useOrders = () => {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
@@ -89,11 +107,11 @@ export const useOrders = () => {
 
       if (error) throw error;
 
-      const formattedOrders = (data || []).map((order: any) => ({
+      const formattedOrders = (data as unknown as OrderResponse[] || []).map((order) => ({
         ...order,
         buyer_name: order.buyer?.full_name || "Unknown Buyer",
         farmer_name: order.farmer?.full_name || "Local Farmer",
-        items: order.order_items.map((item: any) => ({
+        items: order.order_items.map((item) => ({
           ...item,
           listing_name: item.produce_listings?.name,
           listing_unit: item.produce_listings?.unit,
@@ -102,11 +120,12 @@ export const useOrders = () => {
       }));
 
       setOrders(formattedOrders);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching orders:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error fetching orders",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -179,11 +198,12 @@ export const useOrders = () => {
 
       fetchOrders();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating order:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Order failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -208,11 +228,12 @@ export const useOrders = () => {
         description: `Order status changed to ${status}.`,
       });
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating order status:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Update failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
