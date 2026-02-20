@@ -75,9 +75,10 @@ export const useProfile = () => {
     } catch (error: unknown) {
       console.error("Error updating profile:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String((error as Record<string, unknown>).code) : "No code";
       toast({
         title: "Update failed",
-        description: errorMessage,
+        description: `${errorMessage} (Code: ${errorCode})`,
         variant: "destructive",
       });
       return false;
