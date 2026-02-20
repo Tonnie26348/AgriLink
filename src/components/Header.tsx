@@ -1,7 +1,7 @@
  import { useState } from "react";
  import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
- import { Menu, X, Leaf, LogOut, Tractor, ShoppingBag } from "lucide-react";
+ import { Menu, X, Leaf, LogOut, Tractor, ShoppingBag, UserCircle, ClipboardList } from "lucide-react";
  import { useAuth } from "@/contexts/auth-context-definition";
  import CartSheet from "@/components/cart/CartSheet";
  import { useScrollToSection } from "@/hooks/use-scroll-to-section";
@@ -89,6 +89,16 @@ const Header = () => {
                  <Link to={userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard"}>
                   <Button variant="ghost">Dashboard</Button>
                  </Link>
+                 <Link to="/orders">
+                   <Button variant="ghost" size="icon" title="Orders">
+                     <ClipboardList className="w-5 h-5" />
+                   </Button>
+                 </Link>
+                 <Link to="/profile">
+                   <Button variant="ghost" size="icon" title="Profile">
+                     <UserCircle className="w-5 h-5" />
+                   </Button>
+                 </Link>
                  <Button variant="ghost" onClick={handleSignOut}>
                    <LogOut className="w-4 h-4 mr-2" />
                    Log Out
@@ -167,6 +177,12 @@ const Header = () => {
                      </div>
                      <Link to={userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard"}>
                        <Button variant="ghost" className="w-full justify-center">Dashboard</Button>
+                     </Link>
+                     <Link to="/orders">
+                       <Button variant="ghost" className="w-full justify-center">Orders</Button>
+                     </Link>
+                     <Link to="/profile">
+                       <Button variant="ghost" className="w-full justify-center">Profile</Button>
                      </Link>
                      <Button variant="ghost" className="w-full justify-center" onClick={handleSignOut}>
                        <LogOut className="w-4 h-4 mr-2" />

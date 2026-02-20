@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context-definition";
+import { useToast } from "@/hooks/use-toast";
 import { useOrders } from "@/hooks/useOrders";
+import { useMarketplace } from "@/hooks/useMarketplace";
 import OrderCard from "@/components/orders/OrderCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,34 +19,43 @@ import {
   LogOut,
   Loader2,
   ShoppingBag,
+  TrendingUp,
 } from "lucide-react";
  
 const BuyerDashboard = () => {
   const { signOut } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const { orders, loading: ordersLoading } = useOrders();
+  const { listings, loading: listingsLoading } = useMarketplace();
   const [searchQuery, setSearchQuery] = useState("");
-
-  const featuredProduce = [
-    { id: 1, name: "Organic Tomatoes", farmer: "Ram Singh", price: "₹40/kg", rating: 4.8, location: "Punjab", image: "🍅" },
-    { id: 2, name: "Fresh Potatoes", farmer: "Lakshmi Devi", price: "₹25/kg", rating: 4.6, location: "UP", image: "🥔" },
-    { id: 3, name: "Green Peppers", farmer: "Suresh Kumar", price: "₹60/kg", rating: 4.9, location: "Maharashtra", image: "🫑" },
-    { id: 4, name: "Sweet Corn", farmer: "Priya Patel", price: "₹35/kg", rating: 4.7, location: "Gujarat", image: "🌽" },
-  ];
 
   const pendingOrders = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
   const deliveredOrders = orders.filter((o) => o.status === "delivered");
 
   const stats = [
-    { label: "Total Orders", value: orders.length.toString(), icon: Package },
-    { label: "In Progress", value: pendingOrders.length.toString(), icon: Clock },
-    { label: "Delivered", value: deliveredOrders.length.toString(), icon: ShoppingCart },
-    { label: "Saved Farms", value: "8", icon: Heart },
+    { label: "Total Orders", value: orders.length.toString(), icon: Package, color: "text-primary" },
+    { label: "In Progress", value: pendingOrders.length.toString(), icon: Clock, color: "text-secondary" },
+    { label: "Delivered", value: deliveredOrders.length.toString(), icon: ShoppingCart, color: "text-accent" },
+    { label: "Available Items", value: listings.length.toString(), icon: TrendingUp, color: "text-primary" },
   ];
 
   const handleLogout = async () => {
-    await signOut();
-    navigate("/");
+    try {
+      await signOut();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate("/");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: error.message || "An unexpected error occurred during logout.",
+      });
+    }
   };
  
    return (
@@ -99,8 +110,8 @@ const BuyerDashboard = () => {
              <Card key={stat.label} className="border-border/50 shadow-soft">
                <CardContent className="pt-6">
                  <div className="flex items-center gap-3">
-                   <div className="p-2 rounded-lg bg-secondary/10">
-                     <stat.icon className="w-5 h-5 text-secondary" />
+                   <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
+                     <stat.icon className="w-5 h-5" />
                    </div>
                    <div>
                      <p className="text-2xl font-bold text-foreground">{stat.value}</p>
@@ -127,36 +138,51 @@ const BuyerDashboard = () => {
                   </Link>
                 </CardHeader>
                <CardContent className="pt-6">
-                 <div className="grid sm:grid-cols-2 gap-4">
-                   {featuredProduce.map((item) => (
-                     <div
-                       key={item.id}
-                       className="p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-secondary/30 transition-all cursor-pointer group"
-                     >
-                       <div className="flex items-start justify-between mb-3">
-                         <span className="text-4xl group-hover:scale-110 transition-transform">{item.image}</span>
-                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                           <Heart className="w-4 h-4" />
-                         </Button>
-                       </div>
-                       <h3 className="font-bold text-foreground group-hover:text-secondary transition-colors">{item.name}</h3>
-                       <p className="text-sm text-muted-foreground mb-3">{item.farmer}</p>
-                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-                         <MapPin className="w-3 h-3" />
-                         <span>{item.location}</span>
-                         <span className="mx-1">•</span>
-                         <Star className="w-3 h-3 text-secondary fill-secondary" />
-                         <span>{item.rating}</span>
-                       </div>
-                       <div className="flex items-center justify-between">
-                         <span className="font-bold text-secondary">{item.price}</span>
-                         <Link to="/marketplace">
+                 {listingsLoading ? (
+                   <div className="flex items-center justify-center py-12">
+                     <Loader2 className="w-8 h-8 animate-spin text-secondary" />
+                   </div>
+                 ) : listings.length === 0 ? (
+                   <div className="text-center py-12">
+                     <Package className="w-12 h-12 mx-auto text-muted-foreground opacity-20 mb-4" />
+                     <p className="text-muted-foreground">No produce available right now</p>
+                   </div>
+                 ) : (
+                   <div className="grid sm:grid-cols-2 gap-4">
+                     {listings.slice(0, 4).map((item) => (
+                       <div
+                         key={item.id}
+                         className="p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-secondary/30 transition-all cursor-pointer group"
+                         onClick={() => navigate("/marketplace")}
+                       >
+                         <div className="flex items-start justify-between mb-3">
+                           {item.image_url ? (
+                             <img src={item.image_url} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                           ) : (
+                             <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-2xl">
+                               📦
+                             </div>
+                           )}
+                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                             <Heart className="w-4 h-4" />
+                           </Button>
+                         </div>
+                         <h3 className="font-bold text-foreground group-hover:text-secondary transition-colors line-clamp-1">{item.name}</h3>
+                         <p className="text-sm text-muted-foreground mb-3">{item.farmer_name}</p>
+                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+                           <MapPin className="w-3 h-3" />
+                           <span>{item.farmer_location}</span>
+                           <span className="mx-1">•</span>
+                           <span className="font-medium text-secondary">{item.category}</span>
+                         </div>
+                         <div className="flex items-center justify-between">
+                           <span className="font-bold text-secondary">Ksh{item.price_per_unit}/{item.unit}</span>
                            <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">Shop</Button>
-                         </Link>
+                         </div>
                        </div>
-                     </div>
-                   ))}
-                 </div>
+                     ))}
+                   </div>
+                 )}
                </CardContent>
              </Card>
            </div>
@@ -202,31 +228,23 @@ const BuyerDashboard = () => {
  
              <Card className="shadow-soft border-border/50">
                <CardHeader className="pb-3 border-b border-border/10">
-                 <CardTitle className="text-lg flex items-center gap-2">
-                   <Heart className="w-5 h-5 text-secondary" />
-                   Saved Farms
-                 </CardTitle>
+                 <div className="flex items-center justify-between">
+                   <CardTitle className="text-lg flex items-center gap-2">
+                     <Heart className="w-5 h-5 text-secondary" />
+                     Saved Farms
+                   </CardTitle>
+                   <span className="px-2 py-0.5 rounded text-[10px] bg-secondary/10 text-secondary font-bold">
+                     SOON
+                   </span>
+                 </div>
                </CardHeader>
-               <CardContent className="pt-4">
-                 <div className="space-y-3">
-                   <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/5 border border-transparent hover:border-secondary/10 transition-all cursor-pointer">
-                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-                       🌾
-                     </div>
-                     <div>
-                       <p className="text-sm font-bold">Green Valley Farms</p>
-                       <p className="text-xs text-muted-foreground">Punjab • 4.9 ⭐</p>
-                     </div>
+               <CardContent className="pt-6">
+                 <div className="text-center py-4">
+                   <div className="w-12 h-12 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
+                     <Heart className="w-6 h-6 text-muted-foreground opacity-20" />
                    </div>
-                   <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/5 border border-transparent hover:border-secondary/10 transition-all cursor-pointer">
-                     <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-lg">
-                       🥕
-                     </div>
-                     <div>
-                       <p className="text-sm font-bold">Sunrise Organics</p>
-                       <p className="text-xs text-muted-foreground">Maharashtra • 4.8 ⭐</p>
-                     </div>
-                   </div>
+                   <p className="text-sm font-medium text-foreground mb-1">Stay Connected</p>
+                   <p className="text-xs text-muted-foreground">Follow your favorite farmers to get updates on their latest harvest.</p>
                  </div>
                </CardContent>
              </Card>

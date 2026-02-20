@@ -255,7 +255,7 @@ const ProduceCard = ({ listing, onOrder, onAddToCart }: ProduceCardProps) => {
         <div className="flex items-center justify-between">
           <div>
             <span className="text-xl font-bold text-primary">
-              ₹{listing.price_per_unit}
+              Ksh{listing.price_per_unit}
             </span>
             <span className="text-sm text-muted-foreground">/{listing.unit}</span>
           </div>

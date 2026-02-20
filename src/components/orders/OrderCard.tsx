@@ -130,11 +130,11 @@ const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
                   {item.listing_name || "Unknown Item"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {item.quantity} {item.listing_unit} × ₹{item.price_per_unit}
+                  {item.quantity} {item.listing_unit} × Ksh{item.price_per_unit}
                 </p>
               </div>
               <p className="text-sm font-medium text-foreground">
-                ₹{item.total_price}
+                Ksh{item.total_price}
               </p>
             </div>
           ))}
@@ -159,7 +159,7 @@ const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
         <div className="flex items-center justify-between pt-3 border-t border-border/50">
           <div>
             <p className="text-xs text-muted-foreground">Total Amount</p>
-            <p className="text-lg font-bold text-primary">₹{order.total_amount}</p>
+            <p className="text-lg font-bold text-primary">Ksh{order.total_amount}</p>
           </div>
 
           {viewAs === "farmer" && availableStatuses.length > 0 && onUpdateStatus && (

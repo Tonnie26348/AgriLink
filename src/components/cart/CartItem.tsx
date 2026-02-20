@@ -76,7 +76,7 @@ const CartItem = ({ item }: CartItemProps) => {
           {/* Price & Remove */}
           <div className="flex items-center gap-2">
             <span className="font-semibold text-primary text-sm">
-              ₹{(item.quantity * item.pricePerUnit).toFixed(0)}
+              Ksh{(item.quantity * item.pricePerUnit).toFixed(0)}
             </span>
             <Button
               variant="ghost"

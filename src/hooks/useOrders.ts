@@ -56,10 +56,10 @@ interface OrderItemResponse extends OrderItem {
 
 interface OrderResponse extends Order {
   order_items: OrderItemResponse[];
-  buyer: {
+  buyer_profile: {
     full_name: string | null;
   } | null;
-  farmer: {
+  farmer_profile: {
     full_name: string | null;
   } | null;
 }
@@ -88,10 +88,10 @@ export const useOrders = () => {
               image_url
             )
           ),
-          buyer:buyer_id (
+          buyer_profile:profiles!orders_buyer_id_fkey (
             full_name
           ),
-          farmer:farmer_id (
+          farmer_profile:profiles!orders_farmer_id_fkey (
             full_name
           )
         `)
@@ -109,8 +109,8 @@ export const useOrders = () => {
 
       const formattedOrders = (data as unknown as OrderResponse[] || []).map((order) => ({
         ...order,
-        buyer_name: order.buyer?.full_name || "Unknown Buyer",
-        farmer_name: order.farmer?.full_name || "Local Farmer",
+        buyer_name: order.buyer_profile?.full_name || "Unknown Buyer",
+        farmer_name: order.farmer_profile?.full_name || "Local Farmer",
         items: order.order_items.map((item) => ({
           ...item,
           listing_name: item.produce_listings?.name,

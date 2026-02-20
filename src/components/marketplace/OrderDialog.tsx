@@ -164,7 +164,7 @@ const OrderDialog = ({ listing, open, onOpenChange, onSuccess }: OrderDialogProp
             </div>
           </div>
           <div className="text-right">
-            <p className="font-bold text-primary">₹{listing.price_per_unit}</p>
+            <p className="font-bold text-primary">Ksh{listing.price_per_unit}</p>
             <p className="text-xs text-muted-foreground">per {listing.unit}</p>
           </div>
         </div>
@@ -256,7 +256,7 @@ const OrderDialog = ({ listing, open, onOpenChange, onSuccess }: OrderDialogProp
             {/* Order Total */}
             <div className="flex items-center justify-between p-4 rounded-lg bg-primary/5 border border-primary/20">
               <span className="font-medium text-foreground">Order Total</span>
-              <span className="text-2xl font-bold text-primary">₹{totalPrice.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-primary">Ksh{totalPrice.toFixed(2)}</span>
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -266,7 +266,7 @@ const OrderDialog = ({ listing, open, onOpenChange, onSuccess }: OrderDialogProp
                   Placing Order...
                 </>
               ) : (
-                <>Place Order - ₹{totalPrice.toFixed(2)}</>
+                <>Place Order - Ksh{totalPrice.toFixed(2)}</>
               )}
             </Button>
           </form>

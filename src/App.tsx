@@ -13,6 +13,8 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FarmerDashboard from "@/pages/farmer/FarmerDashboard";
 import BuyerDashboard from "@/pages/buyer/BuyerDashboard";
+import ProfilePage from "./pages/Profile";
+import OrdersPage from "./pages/OrdersPage";
 import AIInsightsPage from "./pages/AIInsightsPage";
 import FeaturesPage from "./pages/FeaturesPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -51,6 +53,22 @@ const App = () => (
                 element={
                   <ProtectedRoute allowedRoles={["buyer"]}>
                     <BuyerDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <OrdersPage />
                   </ProtectedRoute>
                 }
               />

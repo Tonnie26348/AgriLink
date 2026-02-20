@@ -187,7 +187,7 @@ const CartSheet = () => {
                     <div className="flex justify-between text-sm mt-2 px-1">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="font-medium">
-                        ₹
+                        Ksh
                         {group.items
                           .reduce((sum, i) => sum + i.quantity * i.pricePerUnit, 0)
                           .toFixed(0)}
@@ -202,7 +202,7 @@ const CartSheet = () => {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Total</span>
                 <span className="text-2xl font-bold text-primary">
-                  ₹{total.toFixed(0)}
+                  Ksh{total.toFixed(0)}
                 </span>
               </div>
 

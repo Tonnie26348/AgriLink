@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context-definition";
+import { useToast } from "@/hooks/use-toast";
 import { useProduceListings, ProduceListing, CreateListingInput } from "@/hooks/useProduceListings";
 import { useOrders } from "@/hooks/useOrders";
 import OrderCard from "@/components/orders/OrderCard";
@@ -43,6 +44,7 @@ import {
 
 const FarmerDashboard = () => {
   const { signOut } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const { 
     listings, 
@@ -101,8 +103,21 @@ const FarmerDashboard = () => {
   };
 
   const handleLogout = async () => {
-    await signOut();
-    navigate("/");
+    try {
+      await signOut();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate("/");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: error.message || "An unexpected error occurred during logout.",
+      });
+    }
   };
 
   return (
@@ -217,7 +232,7 @@ const FarmerDashboard = () => {
                           <div>
                             <p className="font-bold text-foreground group-hover:text-primary transition-colors">{listing.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-sm font-semibold text-primary">₹{listing.price_per_unit}/{listing.unit}</span>
+                              <span className="text-sm font-semibold text-primary">Ksh{listing.price_per_unit}/{listing.unit}</span>
                               <span className="text-xs text-muted-foreground">•</span>
                               <span className="text-sm text-muted-foreground">{listing.quantity_available} {listing.unit} in stock</span>
                             </div>

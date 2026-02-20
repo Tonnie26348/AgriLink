@@ -7,7 +7,7 @@ const insights = [
     icon: TrendingUp,
     title: "Price Ranges",
     description: "Get AI-suggested price ranges (minimum and maximum) based on historical market data and seasonal patterns.",
-    sample: "Tomatoes: ₹40-50/kg (suggested range for current season)",
+    sample: "Tomatoes: Ksh 40-50/kg (suggested range for current season)",
   },
   {
     icon: Target,
@@ -27,7 +27,7 @@ const keyMetrics = [
   {
     icon: DollarSign,
     title: "Today's Best Price",
-    value: "KES 45/kg",
+    value: "Ksh 45/kg",
     description: "AI-suggested optimal price for your produce.",
   },
   {

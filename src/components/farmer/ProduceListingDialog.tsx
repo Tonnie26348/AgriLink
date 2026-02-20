@@ -273,7 +273,7 @@ const ProduceListingDialog = ({
                 name="price_per_unit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price per Unit (₹)</FormLabel>
+                    <FormLabel>Price per Unit (Ksh)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" min="0" {...field} />
                     </FormControl>
