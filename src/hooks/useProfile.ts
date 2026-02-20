@@ -41,11 +41,12 @@ export const useProfile = () => {
       } else {
         setProfile(data);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching profile:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error fetching profile",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -71,11 +72,12 @@ export const useProfile = () => {
         description: "Your profile information has been saved.",
       });
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating profile:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Update failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -102,10 +104,11 @@ export const useProfile = () => {
         .getPublicUrl(fileName);
 
       return data.publicUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error uploading image",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return null;

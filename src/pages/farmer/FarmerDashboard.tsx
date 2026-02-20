@@ -110,12 +110,13 @@ const FarmerDashboard = () => {
         description: "You have been successfully logged out.",
       });
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Logout error:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during logout.";
       toast({
         variant: "destructive",
         title: "Logout failed",
-        description: error.message || "An unexpected error occurred during logout.",
+        description: errorMessage,
       });
     }
   };
