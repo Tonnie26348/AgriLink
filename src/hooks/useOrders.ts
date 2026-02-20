@@ -132,7 +132,7 @@ export const useOrders = () => {
       if (!isMounted) return;
       console.error("Error in fetchOrders:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String((error as any).code) : "No code";
+      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String((error as Record<string, unknown>).code) : "No code";
       toast({
         title: "Error fetching orders",
         description: `${errorMessage} (Code: ${errorCode})`,
