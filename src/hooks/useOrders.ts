@@ -56,10 +56,10 @@ interface OrderItemResponse extends OrderItem {
 
 interface OrderResponse extends Order {
   order_items: OrderItemResponse[];
-  buyer_profile: {
+  buyer: {
     full_name: string | null;
   } | null;
-  farmer_profile: {
+  farmer: {
     full_name: string | null;
   } | null;
 }
@@ -70,14 +70,14 @@ export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = useCallback(async (isMounted = true) => {
     if (!user || !userRole) {
-      setLoading(false);
+      if (isMounted) setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
+      if (isMounted) setLoading(true);
       
       let query = supabase
         .from("orders")
@@ -91,10 +91,10 @@ export const useOrders = () => {
               image_url
             )
           ),
-          buyer_profile:profiles!buyer_id (
+          buyer:profiles!buyer_id (
             full_name
           ),
-          farmer_profile:profiles!farmer_id (
+          farmer:profiles!farmer_id (
             full_name
           )
         `)
@@ -113,10 +113,12 @@ export const useOrders = () => {
         throw error;
       }
 
+      if (!isMounted) return;
+
       const formattedOrders = (data as unknown as OrderResponse[] || []).map((order) => ({
         ...order,
-        buyer_name: order.buyer_profile?.full_name || "Unknown Buyer",
-        farmer_name: order.farmer_profile?.full_name || "Local Farmer",
+        buyer_name: order.buyer?.full_name || "Unknown Buyer",
+        farmer_name: order.farmer?.full_name || "Local Farmer",
         items: (order.order_items || []).map((item) => ({
           ...item,
           listing_name: item.produce_listings?.name,
@@ -127,16 +129,17 @@ export const useOrders = () => {
 
       setOrders(formattedOrders);
     } catch (error: unknown) {
+      if (!isMounted) return;
       console.error("Error in fetchOrders:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String(error.code) : "No code";
+      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String((error as any).code) : "No code";
       toast({
         title: "Error fetching orders",
         description: `${errorMessage} (Code: ${errorCode})`,
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      if (isMounted) setLoading(false);
     }
   }, [user, userRole, toast]);
 
@@ -248,7 +251,9 @@ export const useOrders = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
+    let isMounted = true;
+    fetchOrders(isMounted);
+    return () => { isMounted = false; };
   }, [fetchOrders]);
 
   return {
