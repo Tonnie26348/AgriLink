@@ -126,10 +126,10 @@ export const useOrders = () => {
       }));
 
       setOrders(formattedOrders);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error in fetchOrders:", error);
-      const errorMessage = error.message || "An unknown error occurred";
-      const errorCode = error.code || "No code";
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String(error.code) : "No code";
       toast({
         title: "Error fetching orders",
         description: `${errorMessage} (Code: ${errorCode})`,
