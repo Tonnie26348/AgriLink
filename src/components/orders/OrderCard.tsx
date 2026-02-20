@@ -165,7 +165,7 @@ const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
           {viewAs === "farmer" && availableStatuses.length > 0 && onUpdateStatus && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" aria-label="Update order status">
                   Update Status
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </Button>
@@ -175,6 +175,7 @@ const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
                   <DropdownMenuItem
                     key={status}
                     onClick={() => onUpdateStatus(order.id, status)}
+                    className="cursor-pointer"
                   >
                     {STATUS_CONFIG[status].label}
                   </DropdownMenuItem>

@@ -37,7 +37,10 @@ export const useProduceListings = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchListings = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);

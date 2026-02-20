@@ -158,36 +158,49 @@ const BuyerDashboard = () => {
                      <p className="text-muted-foreground">No produce available right now</p>
                    </div>
                  ) : (
-                   <div className="grid sm:grid-cols-2 gap-4">
+                   <div className="grid xs:grid-cols-1 sm:grid-cols-2 gap-4">
                      {listings.slice(0, 4).map((item) => (
                        <div
                          key={item.id}
-                         className="p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-secondary/30 transition-all cursor-pointer group"
+                         className="p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-secondary/30 transition-all cursor-pointer group flex flex-col h-full"
                          onClick={() => navigate("/marketplace")}
                        >
                          <div className="flex items-start justify-between mb-3">
                            {item.image_url ? (
-                             <img src={item.image_url} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                             <img src={item.image_url} alt={item.name} className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover" />
                            ) : (
-                             <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-2xl">
+                             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-secondary/10 flex items-center justify-center text-2xl">
                                📦
                              </div>
                            )}
-                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                           <Button 
+                             variant="ghost" 
+                             size="icon" 
+                             className="h-8 w-8 rounded-full"
+                             aria-label="Save to favorites"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               toast({ title: "Coming Soon", description: "Favorites feature is under development." });
+                             }}
+                           >
                              <Heart className="w-4 h-4" />
                            </Button>
                          </div>
-                         <h3 className="font-bold text-foreground group-hover:text-secondary transition-colors line-clamp-1">{item.name}</h3>
-                         <p className="text-sm text-muted-foreground mb-3">{item.farmer_name}</p>
-                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-                           <MapPin className="w-3 h-3" />
-                           <span>{item.farmer_location}</span>
-                           <span className="mx-1">•</span>
-                           <span className="font-medium text-secondary">{item.category}</span>
+                         <div className="flex-1">
+                           <h3 className="font-bold text-foreground group-hover:text-secondary transition-colors line-clamp-1">{item.name}</h3>
+                           <p className="text-sm text-muted-foreground mb-3 truncate">{item.farmer_name}</p>
+                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground mb-4">
+                             <span className="flex items-center gap-1 shrink-0">
+                               <MapPin className="w-3 h-3" />
+                               {item.farmer_location}
+                             </span>
+                             <span className="hidden xs:inline text-muted-foreground/30">•</span>
+                             <span className="font-medium text-secondary truncate">{item.category}</span>
+                           </div>
                          </div>
-                         <div className="flex items-center justify-between">
-                           <span className="font-bold text-secondary">Ksh{item.price_per_unit}/{item.unit}</span>
-                           <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">Shop</Button>
+                         <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-border/5">
+                           <span className="font-bold text-secondary text-sm sm:text-base whitespace-nowrap">Ksh{item.price_per_unit}/{item.unit}</span>
+                           <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shrink-0">Shop</Button>
                          </div>
                        </div>
                      ))}

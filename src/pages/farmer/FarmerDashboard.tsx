@@ -177,17 +177,17 @@ const FarmerDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((stat) => (
             <Card key={stat.label} className="border-border/50 shadow-soft">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="pt-6 px-4 sm:px-6">
+                <div className="flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{stat.value}</p>
                   </div>
-                  <div className={`p-3 rounded-xl bg-muted ${stat.color}`}>
-                    <stat.icon className="w-6 h-6" />
+                  <div className={`p-2 sm:p-3 rounded-xl bg-muted ${stat.color} shrink-0`}>
+                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
               </CardContent>
@@ -227,30 +227,30 @@ const FarmerDashboard = () => {
                     {listings.map((listing) => (
                       <div
                         key={listing.id}
-                        className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-primary/20 transition-all group"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-primary/20 transition-all group gap-4"
                       >
                         <div className="flex items-center gap-4">
                           {listing.image_url ? (
                             <img
                               src={listing.image_url}
                               alt={listing.name}
-                              className="w-14 h-14 rounded-lg object-cover shadow-sm"
+                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shadow-sm shrink-0"
                             />
                           ) : (
-                            <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center">
-                              <Package className="w-7 h-7 text-primary opacity-60" />
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                              <Package className="w-6 h-6 sm:w-7 sm:h-7 text-primary opacity-60" />
                             </div>
                           )}
-                          <div>
-                            <p className="font-bold text-foreground group-hover:text-primary transition-colors">{listing.name}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
+                          <div className="min-w-0">
+                            <p className="font-bold text-foreground group-hover:text-primary transition-colors truncate">{listing.name}</p>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                               <span className="text-sm font-semibold text-primary">Ksh{listing.price_per_unit}/{listing.unit}</span>
-                              <span className="text-xs text-muted-foreground">•</span>
-                              <span className="text-sm text-muted-foreground">{listing.quantity_available} {listing.unit} in stock</span>
+                              <span className="text-xs text-muted-foreground hidden sm:inline">•</span>
+                              <span className="text-xs sm:text-sm text-muted-foreground">{listing.quantity_available} {listing.unit} in stock</span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0">
                           <span
                             className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold ${
                               listing.is_available
@@ -262,7 +262,7 @@ const FarmerDashboard = () => {
                           </span>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-9 w-9">
+                              <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Open menu">
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>

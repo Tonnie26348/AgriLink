@@ -71,7 +71,10 @@ export const useOrders = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
-    if (!user || !userRole) return;
+    if (!user || !userRole) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -105,13 +108,16 @@ export const useOrders = () => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching orders:", error);
+        throw error;
+      }
 
       const formattedOrders = (data as unknown as OrderResponse[] || []).map((order) => ({
         ...order,
         buyer_name: order.buyer_profile?.full_name || "Unknown Buyer",
         farmer_name: order.farmer_profile?.full_name || "Local Farmer",
-        items: order.order_items.map((item) => ({
+        items: (order.order_items || []).map((item) => ({
           ...item,
           listing_name: item.produce_listings?.name,
           listing_unit: item.produce_listings?.unit,
@@ -120,12 +126,13 @@ export const useOrders = () => {
       }));
 
       setOrders(formattedOrders);
-    } catch (error: unknown) {
-      console.error("Error fetching orders:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    } catch (error: any) {
+      console.error("Error in fetchOrders:", error);
+      const errorMessage = error.message || "An unknown error occurred";
+      const errorCode = error.code || "No code";
       toast({
         title: "Error fetching orders",
-        description: errorMessage,
+        description: `${errorMessage} (Code: ${errorCode})`,
         variant: "destructive",
       });
     } finally {
