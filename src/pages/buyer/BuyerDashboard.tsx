@@ -41,13 +41,15 @@ const BuyerDashboard = () => {
   ];
 
   const handleLogout = async () => {
+    console.log("Buyer logout initiated");
     try {
       await signOut();
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
-      navigate("/");
+      // Use window.location for a clean break from the dashboard state
+      window.location.href = "/AgriLink/";
     } catch (error: unknown) {
       console.error("Logout error:", error);
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during logout.";
@@ -77,11 +79,18 @@ const BuyerDashboard = () => {
              <Link to="/marketplace" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
                Marketplace
              </Link>
+             <Link to="/profile" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
+               Profile
+             </Link>
              <div className="w-px h-6 bg-border mx-1" />
-             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
+             <button 
+               type="button"
+               onClick={handleLogout} 
+               className="flex items-center text-sm font-medium text-muted-foreground hover:text-destructive transition-colors px-2 py-1 rounded-md hover:bg-destructive/5"
+             >
                <LogOut className="w-4 h-4 mr-2" />
                Log Out
-             </Button>
+             </button>
            </div>
          </div>
        </header>
