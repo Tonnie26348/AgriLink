@@ -20,37 +20,37 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async () => {
-    if (!user) return;
+  const fetchProfile = useCallback(async (isMounted = true) => {
+    if (!user) {
+      if (isMounted) setLoading(false);
+      return;
+    }
 
     try {
-      setLoading(true);
+      if (isMounted) setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Profile doesn't exist yet, this can happen if trigger failed or for old users
-          setProfile(null);
-        } else {
-          throw error;
-        }
-      } else {
+      if (error) throw error;
+      
+      if (isMounted) {
         setProfile(data);
       }
     } catch (error: unknown) {
       console.error("Error fetching profile:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-      toast({
-        title: "Error fetching profile",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      if (isMounted) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        toast({
+          title: "Error fetching profile",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
-      setLoading(false);
+      if (isMounted) setLoading(false);
     }
   }, [user, toast]);
 
@@ -59,7 +59,8 @@ export const useProfile = () => {
 
     try {
       setLoading(true);
-      const { error } = await supabase
+      
+      const { data, error } = await supabase
         .from("profiles")
         .upsert({
           ...updates,
@@ -67,11 +68,13 @@ export const useProfile = () => {
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'user_id'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      setProfile((prev) => (prev ? { ...prev, ...updates } : null));
+      setProfile(data);
       toast({
         title: "Profile updated",
         description: "Your profile information has been saved.",
@@ -101,7 +104,9 @@ export const useProfile = () => {
 
       const { error: uploadError } = await supabase.storage
         .from("profile-images")
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
@@ -111,6 +116,7 @@ export const useProfile = () => {
 
       return data.publicUrl;
     } catch (error: unknown) {
+      console.error("Error uploading avatar:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error uploading image",
@@ -122,7 +128,9 @@ export const useProfile = () => {
   };
 
   useEffect(() => {
-    fetchProfile();
+    let isMounted = true;
+    fetchProfile(isMounted);
+    return () => { isMounted = false; };
   }, [fetchProfile]);
 
   return {
@@ -130,6 +138,6 @@ export const useProfile = () => {
     loading,
     updateProfile,
     uploadAvatar,
-    refreshProfile: fetchProfile,
+    refreshProfile: () => fetchProfile(true),
   };
 };
