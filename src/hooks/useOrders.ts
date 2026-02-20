@@ -88,10 +88,10 @@ export const useOrders = () => {
               image_url
             )
           ),
-          buyer_profile:profiles!orders_buyer_id_fkey (
+          buyer_profile:profiles!buyer_id (
             full_name
           ),
-          farmer_profile:profiles!orders_farmer_id_fkey (
+          farmer_profile:profiles!farmer_id (
             full_name
           )
         `)

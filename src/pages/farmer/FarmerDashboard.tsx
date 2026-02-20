@@ -40,6 +40,7 @@ import {
   EyeOff,
   Loader2,
   LayoutDashboard,
+  ChevronRight,
 } from "lucide-react";
 
 const FarmerDashboard = () => {
@@ -136,9 +137,10 @@ const FarmerDashboard = () => {
           </Link>
 
           <div className="flex items-center gap-4">
-            <Link to="/marketplace" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Marketplace
-            </Link>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-medium text-foreground">Live Market</span>
+            </div>
             <div className="w-px h-6 bg-border mx-1" />
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
               <LogOut className="w-4 h-4 mr-2" />
@@ -356,6 +358,21 @@ const FarmerDashboard = () => {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-soft border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Explore Marketplace</CardTitle>
+                <CardDescription>See what other farmers are selling and check current trends</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link to="/marketplace">
+                  <Button variant="outline" className="w-full group">
+                    Go to Marketplace
+                    <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
