@@ -20,6 +20,7 @@ import {
   Loader2,
   ShoppingBag,
   TrendingUp,
+  UserCircle,
 } from "lucide-react";
  
 const BuyerDashboard = () => {
@@ -79,9 +80,15 @@ const BuyerDashboard = () => {
              <Link to="/marketplace" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
                Marketplace
              </Link>
-             <Link to="/profile" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
+             <Button 
+               variant="ghost" 
+               size="sm" 
+               onClick={() => window.location.href = "/AgriLink/profile"}
+               className="text-muted-foreground hover:text-secondary"
+             >
+               <UserCircle className="w-4 h-4 mr-2" />
                Profile
-             </Link>
+             </Button>
              <div className="w-px h-6 bg-border mx-1" />
              <button 
                type="button"
