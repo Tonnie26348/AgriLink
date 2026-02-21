@@ -45,7 +45,7 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
         .from("produce_listings")
         .select(`
           *,
-          profiles:farmer_id (
+          profiles!produce_listings_farmer_id_fkey (
             full_name,
             location
           )
@@ -64,7 +64,10 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching listings:", error);
+        throw error;
+      }
 
       const formattedListings = (data as unknown as MarketplaceItemResponse[] || []).map((item) => ({
         ...item,
@@ -76,9 +79,10 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
     } catch (error: unknown) {
       console.error("Error fetching marketplace listings:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String((error as Record<string, unknown>).code) : "No code";
       toast({
         title: "Error fetching listings",
-        description: errorMessage,
+        description: `${errorMessage} (Code: ${errorCode})`,
         variant: "destructive",
       });
     } finally {

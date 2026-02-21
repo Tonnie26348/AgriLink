@@ -1,4 +1,4 @@
--- SUPABASE SETUP SCRIPT (Final Fix for Orders)
+-- SUPABASE SETUP SCRIPT (Relationship fix for Marketplace)
 -- Run this in your Supabase SQL Editor
 
 -- 1. Ensure avatar_url exists
@@ -14,12 +14,9 @@ VALUES ('profile-images', 'profile-images', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. FIX RELATIONSHIPS FOR ORDERS
--- First, remove any existing potentially broken constraints
 ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_buyer_id_fkey;
 ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_farmer_id_fkey;
 
--- Add correct constraints pointing to profiles(user_id)
--- This allows Supabase to join orders directly to profiles
 ALTER TABLE public.orders
 ADD CONSTRAINT orders_buyer_id_fkey 
 FOREIGN KEY (buyer_id) 
@@ -30,7 +27,16 @@ ADD CONSTRAINT orders_farmer_id_fkey
 FOREIGN KEY (farmer_id) 
 REFERENCES public.profiles(user_id);
 
--- 4. RLS POLICIES FOR STORAGE (produce-images)
+-- 4. FIX RELATIONSHIP FOR PRODUCE LISTINGS
+-- This allows joining listings to profiles to get farmer name/location
+ALTER TABLE public.produce_listings DROP CONSTRAINT IF EXISTS produce_listings_farmer_id_fkey;
+
+ALTER TABLE public.produce_listings
+ADD CONSTRAINT produce_listings_farmer_id_fkey 
+FOREIGN KEY (farmer_id) 
+REFERENCES public.profiles(user_id);
+
+-- 5. RLS POLICIES FOR STORAGE (produce-images)
 DROP POLICY IF EXISTS "Anyone can view produce images" ON storage.objects;
 DROP POLICY IF EXISTS "Farmers can upload produce images" ON storage.objects;
 DROP POLICY IF EXISTS "Farmers can update their produce images" ON storage.objects;
@@ -41,7 +47,7 @@ CREATE POLICY "Farmers can upload produce images" ON storage.objects FOR INSERT 
 CREATE POLICY "Farmers can update their produce images" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'produce-images' AND auth.uid()::text = (storage.foldername(name))[1]);
 CREATE POLICY "Farmers can delete their produce images" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'produce-images' AND auth.uid()::text = (storage.foldername(name))[1]);
 
--- 5. RLS POLICIES FOR STORAGE (profile-images)
+-- 6. RLS POLICIES FOR STORAGE (profile-images)
 DROP POLICY IF EXISTS "Anyone can view profile images" ON storage.objects;
 DROP POLICY IF EXISTS "Users can upload their own profile image" ON storage.objects;
 DROP POLICY IF EXISTS "Users can update their own profile image" ON storage.objects;
@@ -52,7 +58,7 @@ CREATE POLICY "Users can upload their own profile image" ON storage.objects FOR 
 CREATE POLICY "Users can update their own profile image" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'profile-images' AND auth.uid()::text = (storage.foldername(name))[1]);
 CREATE POLICY "Users can delete their own profile image" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'profile-images' AND auth.uid()::text = (storage.foldername(name))[1]);
 
--- 6. RLS POLICIES FOR PROFILES
+-- 7. RLS POLICIES FOR PROFILES
 DROP POLICY IF EXISTS "Profiles are viewable by authenticated users" ON public.profiles;
 DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
