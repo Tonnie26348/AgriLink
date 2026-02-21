@@ -144,15 +144,16 @@ const FarmerDashboard = () => {
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs font-medium text-foreground">Live Market</span>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => window.location.href = "/AgriLink/profile"}
-              className="text-muted-foreground hover:text-primary"
-            >
-              <UserCircle className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
+            <Link to="/profile">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground hover:text-primary"
+              >
+                <UserCircle className="w-4 h-4 mr-2" />
+                Profile
+              </Button>
+            </Link>
             <div className="w-px h-6 bg-border mx-1" />
             <button 
               type="button"
