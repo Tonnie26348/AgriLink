@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth-context-definition";
 import { useToast } from "@/hooks/use-toast";
+import { PostgrestError } from "@supabase/supabase-js";
 
 export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
 
@@ -175,7 +176,7 @@ export const useOrders = () => {
         .select()
         .single();
 
-      const { data: order, error: orderError } = (await Promise.race([orderInsertPromise, timeoutPromise])) as any;
+      const { data: order, error: orderError } = (await Promise.race([orderInsertPromise, timeoutPromise])) as { data: Order | null; error: PostgrestError | null };
 
       if (orderError) {
         console.error("CreateOrder: Order insert error:", orderError);
