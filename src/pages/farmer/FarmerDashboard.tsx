@@ -427,6 +427,7 @@ const FarmerDashboard = () => {
         listing={editingListing}
         onSubmit={handleSubmit}
         onUploadImage={uploadImage}
+        onSuccess={refetch}
       />
 
       {/* Chat Dialog */}

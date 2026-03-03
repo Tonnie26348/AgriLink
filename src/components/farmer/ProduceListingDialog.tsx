@@ -61,6 +61,7 @@ interface ProduceListingDialogProps {
   listing?: ProduceListing | null;
   onSubmit: (data: CreateListingInput) => Promise<{ error: Error | null; data?: ProduceListing | null }>;
   onUploadImage: (file: File) => Promise<string | null>;
+  onSuccess?: () => void;
 }
 
 const ProduceListingDialog = ({
@@ -69,6 +70,7 @@ const ProduceListingDialog = ({
   listing,
   onSubmit,
   onUploadImage,
+  onSuccess,
 }: ProduceListingDialogProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(listing?.image_url || null);
   const [uploading, setUploading] = useState(false);
@@ -120,6 +122,7 @@ const ProduceListingDialog = ({
     if (!result.error) {
       form.reset();
       setImageUrl(null);
+      onSuccess?.();
       onOpenChange(false);
     }
   };
