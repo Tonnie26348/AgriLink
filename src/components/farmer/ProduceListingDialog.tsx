@@ -43,17 +43,17 @@ const listingSchema = z.object({
 type ListingFormValues = z.infer<typeof listingSchema>;
 
 const CATEGORIES = [
-  "Vegetables",
-  "Fruits",
-  "Grains",
-  "Pulses",
-  "Dairy",
-  "Spices",
-  "Herbs",
+  "Vegetables (Sukuma, Managu, etc.)",
+  "Fruits (Mangoes, Avocadoes, etc.)",
+  "Grains (Maize, Rice, Wheat)",
+  "Pulses (Beans, Ndengu, Njahi)",
+  "Dairy & Poultry",
+  "Tubers (Potatoes, Cassava)",
+  "Spices & Herbs",
   "Other",
 ];
 
-const UNITS = ["kg", "g", "lb", "piece", "dozen", "bunch", "liter"];
+const UNITS = ["kg", "90kg bag", "50kg bag", "crate", "piece", "bunch", "liter"];
 
 interface ProduceListingDialogProps {
   open: boolean;

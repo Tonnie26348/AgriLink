@@ -76,9 +76,17 @@ export const PriceInsights = ({
       const name = selected.name.toLowerCase();
       
       let min = price * 0.9, max = price * 1.1, demand: "High" | "Medium" | "Low" = "Medium";
-      let reason = `Based on current market trends for ${selected.name}, your price is competitive.`;
+      let reason = `Based on current market trends for ${selected.name} in Kenya, your price is competitive.`;
       
-      if (name.includes("tomato")) { min = 40; max = 60; demand = "High"; reason = "Tomato demand is seasonally high."; }
+      if (name.includes("tomato")) { 
+        min = 40; max = 65; demand = "High"; reason = "Tomato demand is seasonally high in urban centers."; 
+      } else if (name.includes("sukuma") || name.includes("kale")) {
+        min = 20; max = 35; demand = "High"; reason = "Sukuma Wiki prices are stable with high daily turnover.";
+      } else if (name.includes("maize") || name.includes("mahindi")) {
+        min = 3500; max = 4500; demand = "Medium"; reason = "Maize prices vary based on moisture content and quality.";
+      } else if (name.includes("onion")) {
+        min = 90; max = 140; demand = "High"; reason = "Red onions are currently seeing high demand from wholesale buyers.";
+      }
       
       const position = price < min ? "below" : price > max ? "above" : "within";
 

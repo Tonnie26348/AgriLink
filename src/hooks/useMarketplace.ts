@@ -72,9 +72,8 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
       const formattedListings = (data as unknown as MarketplaceItemResponse[] || []).map((item) => ({
         ...item,
         farmer_name: item.profiles?.full_name || "Local Farmer",
-        farmer_location: item.profiles?.location || "India",
+        farmer_location: item.profiles?.location || "Kenya",
       }));
-
       setListings(formattedListings);
     } catch (error: unknown) {
       console.error("Error fetching marketplace listings:", error);
