@@ -12,54 +12,67 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
+      console.log("AuthContext: Fetching role for", userId);
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (data && !error) {
-        setUserRole(data.role as AppRole);
-      } else {
-        setUserRole(null);
+      if (error) {
+        console.error("AuthContext: Supabase error fetching role:", error);
+        return null;
       }
+      
+      console.log("AuthContext: Role found:", data?.role);
+      return data?.role as AppRole || null;
     } catch (error) {
-      console.error("Error fetching user role:", error);
-      setUserRole(null);
+      console.error("AuthContext: Exception fetching user role:", error);
+      return null;
     }
   };
 
   useEffect(() => {
     let isMounted = true;
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted) return;
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserRole(session.user.id).finally(() => {
-          if (isMounted) setLoading(false);
-        });
-      } else {
-        setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          const role = await fetchUserRole(session.user.id);
+          if (isMounted) setUserRole(role);
+        }
+      } catch (error) {
+        console.error("AuthContext: Initialization error:", error);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log("AuthContext: Auth event:", event);
         if (!isMounted) return;
 
         setSession(session);
         setUser(session?.user ?? null);
+        
         if (session?.user) {
-          await fetchUserRole(session.user.id);
+          const role = await fetchUserRole(session.user.id);
+          if (isMounted) setUserRole(role);
         } else {
-          setUserRole(null);
+          if (isMounted) setUserRole(null);
         }
-        setLoading(false);
+        
+        if (isMounted) setLoading(false);
       }
     );
 
