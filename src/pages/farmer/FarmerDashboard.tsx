@@ -6,6 +6,8 @@ import { useProduceListings, ProduceListing, CreateListingInput } from "@/hooks/
 import { useOrders } from "@/hooks/useOrders";
 import OrderCard from "@/components/orders/OrderCard";
 import ProduceListingDialog from "@/components/farmer/ProduceListingDialog";
+import ConversationList from "@/components/marketplace/ConversationList";
+import ChatDialog from "@/components/marketplace/ChatDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -42,6 +44,7 @@ import {
   LayoutDashboard,
   ChevronRight,
   UserCircle,
+  MessageSquare,
 } from "lucide-react";
 
 const FarmerDashboard = () => {
@@ -64,6 +67,9 @@ const FarmerDashboard = () => {
   const [editingListing, setEditingListing] = useState<ProduceListing | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [selectedChatUser, setSelectedChatUser] = useState<{ id: string; name: string } | null>(null);
 
   const pendingOrders = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
 
@@ -95,6 +101,11 @@ const FarmerDashboard = () => {
       setDeleteDialogOpen(false);
       setDeletingId(null);
     }
+  };
+
+  const handleSelectConversation = (userId: string, userName: string) => {
+    setSelectedChatUser({ id: userId, name: userName });
+    setChatDialogOpen(true);
   };
 
   const handleSubmit = async (data: CreateListingInput) => {
@@ -310,6 +321,19 @@ const FarmerDashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            <Card className="shadow-soft border-border/50 mt-6">
+              <CardHeader className="pb-3 border-b border-border/10">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-primary" />
+                  Recent Conversations
+                </CardTitle>
+                <CardDescription>Chat with buyers about your produce</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <ConversationList onSelectConversation={handleSelectConversation} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Price Insights & Orders */}
@@ -404,6 +428,16 @@ const FarmerDashboard = () => {
         onSubmit={handleSubmit}
         onUploadImage={uploadImage}
       />
+
+      {/* Chat Dialog */}
+      {selectedChatUser && (
+        <ChatDialog
+          open={chatDialogOpen}
+          onOpenChange={setChatDialogOpen}
+          receiverId={selectedChatUser.id}
+          receiverName={selectedChatUser.name}
+        />
+      )}
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

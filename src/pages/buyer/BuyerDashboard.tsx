@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useOrders } from "@/hooks/useOrders";
 import { useMarketplace } from "@/hooks/useMarketplace";
 import OrderCard from "@/components/orders/OrderCard";
+import ConversationList from "@/components/marketplace/ConversationList";
+import ChatDialog from "@/components/marketplace/ChatDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -21,8 +23,9 @@ import {
   ShoppingBag,
   TrendingUp,
   UserCircle,
+  MessageSquare,
 } from "lucide-react";
- 
+
 const BuyerDashboard = () => {
   const { signOut } = useAuth();
   const { toast } = useToast();
@@ -30,6 +33,9 @@ const BuyerDashboard = () => {
   const { orders, loading: ordersLoading } = useOrders();
   const { listings, loading: listingsLoading } = useMarketplace();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [selectedChatUser, setSelectedChatUser] = useState<{ id: string; name: string } | null>(null);
 
   const pendingOrders = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
   const deliveredOrders = orders.filter((o) => o.status === "delivered");
@@ -40,6 +46,11 @@ const BuyerDashboard = () => {
     { label: "Delivered", value: deliveredOrders.length.toString(), icon: ShoppingCart, color: "text-accent" },
     { label: "Available Items", value: listings.length.toString(), icon: TrendingUp, color: "text-primary" },
   ];
+
+  const handleSelectConversation = (userId: string, userName: string) => {
+    setSelectedChatUser({ id: userId, name: userName });
+    setChatDialogOpen(true);
+  };
 
   const handleLogout = async () => {
     console.log("Buyer logout initiated");
@@ -61,7 +72,7 @@ const BuyerDashboard = () => {
       });
     }
   };
- 
+
    return (
      <div className="min-h-screen bg-muted/30 flex flex-col">
        {/* Dedicated Buyer Header */}
@@ -75,7 +86,7 @@ const BuyerDashboard = () => {
                Agri<span className="text-secondary">Link</span> Buyer
              </span>
            </Link>
- 
+
            <div className="flex items-center gap-4">
              <Link to="/marketplace" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
                Marketplace
@@ -102,7 +113,7 @@ const BuyerDashboard = () => {
            </div>
          </div>
        </header>
- 
+
        <main className="container mx-auto px-4 py-8 flex-1">
          {/* Welcome Section */}
          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -121,7 +132,7 @@ const BuyerDashboard = () => {
              </Button>
            </Link>
          </div>
- 
+
          {/* Stats Grid */}
          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
            {stats.map((stat) => (
@@ -140,7 +151,7 @@ const BuyerDashboard = () => {
              </Card>
            ))}
          </div>
- 
+
          {/* Main Content Grid */}
          <div className="grid lg:grid-cols-3 gap-6">
             {/* Featured Produce */}
@@ -216,8 +227,21 @@ const BuyerDashboard = () => {
                  )}
                </CardContent>
              </Card>
-           </div>
- 
+
+             <Card className="shadow-soft border-border/50 mt-6">
+              <CardHeader className="pb-3 border-b border-border/10">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-secondary" />
+                  Your Conversations
+                </CardTitle>
+                <CardDescription>Chat with farmers about your orders</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <ConversationList onSelectConversation={handleSelectConversation} />
+              </CardContent>
+            </Card>
+            </div>
+
             {/* Recent Orders */}
             <div className="space-y-6">
               <Card className="shadow-soft border-border/50 overflow-hidden">
@@ -256,7 +280,7 @@ const BuyerDashboard = () => {
                   </div>
                 )}
               </Card>
- 
+
              <Card className="shadow-soft border-border/50">
                <CardHeader className="pb-3 border-b border-border/10">
                  <div className="flex items-center justify-between">
@@ -282,7 +306,17 @@ const BuyerDashboard = () => {
            </div>
          </div>
        </main>
- 
+
+       {/* Chat Dialog */}
+      {selectedChatUser && (
+        <ChatDialog
+          open={chatDialogOpen}
+          onOpenChange={setChatDialogOpen}
+          receiverId={selectedChatUser.id}
+          receiverName={selectedChatUser.name}
+        />
+      )}
+
        {/* Simple Dashboard Footer */}
        <footer className="py-6 border-t border-border/50 mt-auto bg-background">
          <div className="container mx-auto px-4 text-center">
@@ -293,6 +327,5 @@ const BuyerDashboard = () => {
        </footer>
      </div>
    );
- };
- 
+ }; 
  export default BuyerDashboard;

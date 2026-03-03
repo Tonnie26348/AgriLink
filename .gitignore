@@ -16,6 +16,8 @@ dist-ssr
 *.env
 
 # Editor directories and files
+agrilink-ai-service/
+supabase/.temp/
 .vscode/*
 !.vscode/extensions.json
 .idea

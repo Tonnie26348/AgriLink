@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,126 +12,60 @@ serve(async (req) => {
   }
 
   try {
-    const { produceType, currentPrice, unit, quantity, location, month } = await req.json();
+    const { produceType, currentPrice, unit, location } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    // 1. Initialize Supabase Client
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
-    // System prompt aligned with project plan - AI as decision support
-    const systemPrompt = `You are an agricultural market analyst AI assistant for AgriLink. Your role is to provide price guidance to help farmers make informed decisions.
+    // 2. Fetch "Real" Market Data from your DB
+    const { data: marketData } = await supabaseClient.rpc('get_market_averages', { 
+      p_name: produceType 
+    });
 
-You analyze:
-- Produce type and current market conditions
-- Seasonal patterns (month/season)
-- Location-based market dynamics
-- Supply indicators (quantity available)
+    const stats = marketData?.[0] || { avg_price: currentPrice, min_price: currentPrice, max_price: currentPrice, total_listings: 0 };
 
-You provide simple, actionable guidance - NOT complex forecasts. Farmers retain full control over their final pricing decisions.`;
+    // 3. Call Gemini API (Free Tier)
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not set");
 
-    const currentMonth = month || new Date().toLocaleString('default', { month: 'long' });
+    const prompt = `You are an AgriLink Market Analyst.
+Analyze this for a farmer in ${location || 'Kenya'}:
+- Produce: ${produceType}
+- Farmer's Price: ${currentPrice} per ${unit}
+- Marketplace Stats (last 30 days): Avg ${stats.avg_price}, Min ${stats.min_price}, Max ${stats.max_price} from ${stats.total_listings} listings.
+- Current Month: ${new Date().toLocaleString('default', { month: 'long' })}
 
-    const userPrompt = `Analyze pricing for this produce listing:
+Return a JSON object:
+{
+  "suggestedPriceMin": number,
+  "suggestedPriceMax": number,
+  "demandLevel": "High" | "Medium" | "Low",
+  "reasoning": "1-2 short sentences",
+  "pricePosition": "below" | "within" | "above"
+}`;
 
-Produce Type: ${produceType}
-Current Listed Price: ${currentPrice} per ${unit}
-Quantity Available: ${quantity} ${unit}
-Location: ${location || 'Kenya'}
-Current Month: ${currentMonth}
-
-Based on typical market patterns, provide:
-1. A suggested price range (minimum and maximum) in the same currency
-2. A demand level classification (High, Medium, or Low)
-3. Brief reasoning (1-2 sentences) for the farmer`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "provide_price_guidance",
-              description: "Provide price range and demand level guidance for farm produce",
-              parameters: {
-                type: "object",
-                properties: {
-                  suggestedPriceMin: {
-                    type: "number",
-                    description: "Minimum suggested price per unit",
-                  },
-                  suggestedPriceMax: {
-                    type: "number",
-                    description: "Maximum suggested price per unit",
-                  },
-                  demandLevel: {
-                    type: "string",
-                    enum: ["High", "Medium", "Low"],
-                    description: "Current demand classification",
-                  },
-                  reasoning: {
-                    type: "string",
-                    description: "Brief explanation for the farmer (1-2 sentences)",
-                  },
-                  pricePosition: {
-                    type: "string",
-                    enum: ["below", "within", "above"],
-                    description: "Whether current price is below, within, or above suggested range",
-                  },
-                },
-                required: ["suggestedPriceMin", "suggestedPriceMax", "demandLevel", "reasoning", "pricePosition"],
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "provide_price_guidance" } },
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { response_mime_type: "application/json" }
       }),
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add funds to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-
-    if (!toolCall?.function?.arguments) {
-      throw new Error("No structured response from AI");
-    }
-
-    const guidance = JSON.parse(toolCall.function.arguments);
+    const result = await response.json();
+    const text = result.candidates[0].content.parts[0].text;
+    const guidance = JSON.parse(text);
 
     return new Response(JSON.stringify({ success: true, guidance }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (error) {
-    console.error("Price insights error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

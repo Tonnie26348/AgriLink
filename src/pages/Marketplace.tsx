@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/auth-context-definition";
 import { useCart } from "@/contexts/cart-context-definition";
 import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
 import OrderDialog from "@/components/marketplace/OrderDialog";
+import ChatDialog from "@/components/marketplace/ChatDialog";
 import ProduceCardSkeleton from "@/components/marketplace/ProduceCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,6 +28,7 @@ import {
   ShoppingCart,
   ArrowLeft,
   Calendar,
+  MessageCircle,
 } from "lucide-react";
 
 const EMOJI_MAP: Record<string, string> = {
@@ -51,6 +53,8 @@ const Marketplace = () => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [chatReceiver, setChatReceiver] = useState<{ id: string; name: string } | null>(null);
 
   const { listings, loading, categories, refetch } = useMarketplace({
     category: selectedCategory,
@@ -66,6 +70,15 @@ const Marketplace = () => {
   const handleOrderClick = (listing: MarketplaceListing) => {
     setSelectedListing(listing);
     setOrderDialogOpen(true);
+  };
+
+  const handleMessageClick = (listing: MarketplaceListing) => {
+    setSelectedListing(listing);
+    setChatReceiver({
+      id: listing.farmer_id,
+      name: listing.farmer_name || "Local Farmer",
+    });
+    setChatDialogOpen(true);
   };
 
   const handleAddToCart = (listing: MarketplaceListing) => {
@@ -176,6 +189,7 @@ const Marketplace = () => {
                   listing={listing} 
                   onOrder={handleOrderClick} 
                   onAddToCart={handleAddToCart}
+                  onMessage={handleMessageClick}
                 />
               ))}
             </div>
@@ -189,6 +203,17 @@ const Marketplace = () => {
         onOpenChange={setOrderDialogOpen}
         onSuccess={refetch}
       />
+
+      {chatReceiver && (
+        <ChatDialog
+          open={chatDialogOpen}
+          onOpenChange={setChatDialogOpen}
+          receiverId={chatReceiver.id}
+          receiverName={chatReceiver.name}
+          listingId={selectedListing?.id}
+          listingName={selectedListing?.name}
+        />
+      )}
       <Footer />
     </div>
   );
@@ -198,9 +223,10 @@ interface ProduceCardProps {
   listing: MarketplaceListing;
   onOrder: (listing: MarketplaceListing) => void;
   onAddToCart: (listing: MarketplaceListing) => void;
+  onMessage: (listing: MarketplaceListing) => void;
 }
 
-const ProduceCard = ({ listing, onOrder, onAddToCart }: ProduceCardProps) => {
+const ProduceCard = ({ listing, onOrder, onAddToCart, onMessage }: ProduceCardProps) => {
   const categoryEmoji = EMOJI_MAP[listing.category] || "📦";
 
   return (
@@ -220,6 +246,14 @@ const ProduceCard = ({ listing, onOrder, onAddToCart }: ProduceCardProps) => {
         <Badge className="absolute top-3 left-3 bg-background/90 text-foreground">
           {listing.category}
         </Badge>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="absolute top-3 right-3 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-soft"
+          onClick={() => onMessage(listing)}
+        >
+          <MessageCircle className="h-4 w-4" />
+        </Button>
       </div>
       <CardContent className="p-4">
         <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-1">
