@@ -72,6 +72,7 @@ const ProduceListingDialog = ({
 }: ProduceListingDialogProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(listing?.image_url || null);
   const [uploading, setUploading] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -92,12 +93,14 @@ const ProduceListingDialog = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setIsResizing(true);
     setUploading(true);
     const url = await onUploadImage(file);
     if (url) {
       setImageUrl(url);
     }
     setUploading(false);
+    setIsResizing(false);
   };
 
   const handleSubmit = async (values: ListingFormValues) => {
@@ -163,7 +166,9 @@ const ProduceListingDialog = ({
                 ) : uploading ? (
                   <div className="py-4">
                     <Loader2 className="w-8 h-8 mx-auto animate-spin text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mt-2">Uploading...</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {isResizing ? "Optimizing Image..." : "Uploading..."}
+                    </p>
                   </div>
                 ) : (
                   <div className="py-4">

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth-context-definition";
 import { useToast } from "@/hooks/use-toast";
+import { resizeImage } from "@/lib/image-utils";
 
 export interface ProduceListing {
   id: string;
@@ -163,12 +164,17 @@ export const useProduceListings = () => {
     if (!user) return null;
 
     try {
-      const fileExt = file.name.split(".").pop();
+      // Compress and resize image before upload
+      const resizedBlob = await resizeImage(file);
+      const fileExt = "jpg"; // We convert to jpeg in resizeImage
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("produce-images")
-        .upload(fileName, file);
+        .upload(fileName, resizedBlob, {
+          contentType: "image/jpeg",
+          upsert: false
+        });
 
       if (uploadError) throw uploadError;
 
