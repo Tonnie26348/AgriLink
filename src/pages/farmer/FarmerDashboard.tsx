@@ -58,10 +58,11 @@ const FarmerDashboard = () => {
     updateListing, 
     deleteListing, 
     toggleAvailability,
-    uploadImage 
+    uploadImage,
+    refetch
   } = useProduceListings();
   
-  const { orders, loading: ordersLoading, updateOrderStatus } = useOrders();
+  const { orders, loading: ordersLoading, updateOrderStatus, refetch: refetchOrders } = useOrders();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingListing, setEditingListing] = useState<ProduceListing | null>(null);
