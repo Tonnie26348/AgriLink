@@ -97,11 +97,12 @@ const ProfilePage = () => {
         title: "Password reset email sent",
         description: "Please check your inbox for instructions to reset your password.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
         variant: "destructive",
         title: "Error resetting password",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setIsResettingPassword(false);
