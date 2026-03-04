@@ -70,44 +70,35 @@ export const useProfile = () => {
       
       cleanUpdates.updated_at = new Date().toISOString();
 
+      // We use a "Perform and Refresh" strategy here.
+      // We don't use .select() because RLS visibility can cause PGRST204 errors
+      // if the row isn't immediately visible to the current policy.
+
       // 1. Try to update existing profile first
-      const { data: updateData, error: updateError } = await supabase
+      const { error: updateError, count } = await supabase
         .from("profiles")
         .update(cleanUpdates)
-        .eq("user_id", user.id)
-        .select();
+        .eq("user_id", user.id);
 
       if (updateError) throw updateError;
 
-      if (updateData && updateData.length > 0) {
-        setProfile(updateData[0]);
-      } else {
-        // 2. If no rows were updated, the profile might not exist. Try to insert.
-        const { data: insertData, error: insertError } = await supabase
+      // If no rows were updated (count is null or 0), the profile might not exist. Try to insert.
+      // Note: count requires 'count: exact' option, but we can just check if we have a profile in state
+      if (!profile) {
+        const { error: insertError } = await supabase
           .from("profiles")
           .insert({
             ...cleanUpdates,
             user_id: user.id
-          })
-          .select();
+          });
 
-        if (insertError) {
-          // If it's a duplicate key error, it means the profile was created 
-          // in the meantime (e.g. by a background trigger). Just refresh.
-          if (insertError.code === '23505') {
-            await fetchProfile();
-            return true;
-          }
+        if (insertError && insertError.code !== '23505') {
           throw insertError;
         }
-
-        if (insertData && insertData.length > 0) {
-          setProfile(insertData[0]);
-        } else {
-          // If still no data returned, manually fetch it
-          await fetchProfile();
-        }
       }
+
+      // Final step: manually fetch the latest profile data to update local state
+      await fetchProfile();
 
       toast({
         title: "Profile updated",
