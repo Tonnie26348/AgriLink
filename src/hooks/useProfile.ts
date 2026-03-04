@@ -60,42 +60,16 @@ export const useProfile = () => {
     try {
       setLoading(true);
       
-      // Filter out fields that shouldn't be updated or cause issues
-      const cleanUpdates: Record<string, string | null> = {};
-      
-      if (updates.full_name !== undefined) cleanUpdates.full_name = updates.full_name;
-      if (updates.phone !== undefined) cleanUpdates.phone = updates.phone;
-      if (updates.location !== undefined) cleanUpdates.location = updates.location;
-      if (updates.avatar_url !== undefined) cleanUpdates.avatar_url = updates.avatar_url;
-      
-      cleanUpdates.updated_at = new Date().toISOString();
+      // Use the RPC for maximum reliability
+      // This avoids PGRST204 errors caused by RLS visibility on return data
+      const { error: rpcError } = await supabase.rpc('update_user_profile', {
+        p_full_name: updates.full_name,
+        p_phone: updates.phone,
+        p_location: updates.location,
+        p_avatar_url: updates.avatar_url
+      });
 
-      // We use a "Perform and Refresh" strategy here.
-      // We don't use .select() because RLS visibility can cause PGRST204 errors
-      // if the row isn't immediately visible to the current policy.
-
-      // 1. Try to update existing profile first
-      const { error: updateError, count } = await supabase
-        .from("profiles")
-        .update(cleanUpdates)
-        .eq("user_id", user.id);
-
-      if (updateError) throw updateError;
-
-      // If no rows were updated (count is null or 0), the profile might not exist. Try to insert.
-      // Note: count requires 'count: exact' option, but we can just check if we have a profile in state
-      if (!profile) {
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert({
-            ...cleanUpdates,
-            user_id: user.id
-          });
-
-        if (insertError && insertError.code !== '23505') {
-          throw insertError;
-        }
-      }
+      if (rpcError) throw rpcError;
 
       // Final step: manually fetch the latest profile data to update local state
       await fetchProfile();
