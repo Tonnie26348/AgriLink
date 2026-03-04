@@ -1,15 +1,40 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Users, TrendingUp, DollarSign, Leaf } from "lucide-react"; // Changed Seed to Leaf
+import { Users, TrendingUp, DollarSign, Leaf, Loader2 } from "lucide-react";
+import { useSystemStats } from "@/hooks/useSystemStats";
 
-const impactMetrics = [
-  { icon: Users, value: "10K+", label: "Farmers Empowered" },
-  { icon: TrendingUp, value: "40%", label: "Average Income Increase" },
-  { icon: DollarSign, value: "50M+", label: "Value Transacted (KES)" },
-  { icon: Leaf, value: "20+", label: "Regions Covered" }, // Changed Seed to Leaf
-];
+const formatNumber = (num: number, suffix = "") => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M+" + suffix;
+  if (num >= 1000) return (num / 1000).toFixed(1) + "K+" + suffix;
+  return num.toString() + suffix;
+};
 
 const Impact = () => {
+  const { stats, loading } = useSystemStats();
+
+  const impactMetrics = [
+    { 
+      icon: Users, 
+      value: loading ? "..." : formatNumber(stats.farmerCount), 
+      label: "Farmers Connected" 
+    },
+    { 
+      icon: TrendingUp, 
+      value: loading ? "..." : stats.buyerCount.toLocaleString(), 
+      label: "Active Buyers" 
+    },
+    { 
+      icon: Leaf, 
+      value: loading ? "..." : formatNumber(stats.farmerCount), 
+      label: "Farmers Empowered" 
+    },
+    { 
+      icon: DollarSign, 
+      value: loading ? "..." : formatNumber(stats.totalValue, " KES"), 
+      label: "Value Transacted" 
+    },
+  ];
+
   return (
     <section id="impact" className="py-20 md:py-28 bg-primary text-primary-foreground relative overflow-hidden">
       {/* Background Pattern */}
@@ -43,8 +68,12 @@ const Impact = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 text-primary-foreground">
           {impactMetrics.map((metric, index) => (
             <div key={index} className="text-center">
-              <metric.icon className="w-10 h-10 text-secondary mb-3 mx-auto" />
-              <div className="text-3xl md:text-4xl font-display font-bold mb-1">
+              {loading ? (
+                <Loader2 className="w-10 h-10 animate-spin text-secondary mb-3 mx-auto" />
+              ) : (
+                <metric.icon className="w-10 h-10 text-secondary mb-3 mx-auto" />
+              )}
+              <div className="text-3xl md:text-4xl font-display font-bold mb-1 min-h-[44px]">
                 {metric.value}
               </div>
               <div className="text-sm text-primary-foreground/70">

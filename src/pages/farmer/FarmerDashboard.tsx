@@ -6,6 +6,7 @@ import { useProduceListings, ProduceListing, CreateListingInput } from "@/hooks/
 import { useOrders } from "@/hooks/useOrders";
 import OrderCard from "@/components/orders/OrderCard";
 import ProduceListingDialog from "@/components/farmer/ProduceListingDialog";
+import { SalesAnalytics } from "@/components/farmer/SalesAnalytics";
 import ConversationList from "@/components/marketplace/ConversationList";
 import ChatDialog from "@/components/marketplace/ChatDialog";
 import { Button } from "@/components/ui/button";
@@ -341,8 +342,18 @@ const FarmerDashboard = () => {
           <div className="space-y-6">
             <Card className="shadow-soft border-border/50">
               <CardHeader className="pb-3 border-b border-border/10">
-                <CardTitle className="text-xl">Market Status</CardTitle>
-                <CardDescription>How your prices compare</CardDescription>
+                <CardTitle className="text-xl">Sales Insights</CardTitle>
+                <CardDescription>Your revenue and performance trends</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <SalesAnalytics orders={orders} />
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-soft border-border/50">
+              <CardHeader className="pb-3 border-b border-border/10">
+                <CardTitle className="text-xl">AI Price Guidance</CardTitle>
+                <CardDescription>Get suggested prices for your items</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                 {listings.length > 0 ? (

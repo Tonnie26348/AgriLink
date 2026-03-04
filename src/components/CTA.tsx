@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const CTA = () => {
   return (
@@ -22,13 +23,17 @@ const CTA = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button variant="default" size="xl">
-              Join as Farmer
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-            <Button variant="outline" size="xl">
-              Join as Buyer
-            </Button>
+            <Link to="/signup?role=farmer">
+              <Button variant="default" size="xl" className="w-full sm:w-auto">
+                Join as Farmer
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link to="/signup?role=buyer">
+              <Button variant="outline" size="xl" className="w-full sm:w-auto">
+                Join as Buyer
+              </Button>
+            </Link>
           </div>
 
           {/* Trust Indicators */}

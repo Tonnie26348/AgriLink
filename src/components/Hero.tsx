@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, TrendingUp, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   const stats = [
@@ -37,13 +38,17 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in delay-300 opacity-0">
-              <Button variant="hero" size="xl">
-                Start Selling
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-              <Button variant="hero-outline" size="xl">
-                Find Produce
-              </Button>
+              <Link to="/signup?role=farmer">
+                <Button variant="hero" size="xl" className="w-full sm:w-auto">
+                  Start Selling
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Link to="/marketplace">
+                <Button variant="hero-outline" size="xl" className="w-full sm:w-auto">
+                  Find Produce
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}

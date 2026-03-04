@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
- import { useNavigate, Link } from "react-router-dom";
+ import { useNavigate, Link, useSearchParams } from "react-router-dom";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
  import { Label } from "@/components/ui/label";
@@ -14,10 +14,11 @@ import { useState, useEffect } from "react";
  import Footer from "@/components/Footer";
   
   const Signup = () => {
+    const [searchParams] = useSearchParams();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
-    const [role, setRole] = useState<AppRole | null>(null);
+    const [role, setRole] = useState<AppRole | null>((searchParams.get("role") as AppRole) || null);
     const [isLoading, setIsLoading] = useState(false);
    const { signUp, userRole } = useAuth();
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ import { useState, useEffect } from "react";
          navigate(redirectPath, { replace: true });
        }
      }, [userRole, navigate]); 
+
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       
@@ -55,12 +57,14 @@ import { useState, useEffect } from "react";
         setIsLoading(false);
       } else {
         toast({
-          title: "Account created!",
-          description: "Welcome to AgriLink! Redirecting to your dashboard...",
+          title: "Account created successfully!",
+          description: "Please check your email for a confirmation link before logging in.",
         });
         
-        // The useEffect above will handle the navigation once userRole is set by AuthContext
-        // We keep isLoading true to show a loading state during this transition
+        // If the system redirects automatically, the user might miss the message.
+        // But for many Supabase setups, they need to confirm email first.
+        // We stop loading to let them see the toast.
+        setIsLoading(false);
       }
     };
   
