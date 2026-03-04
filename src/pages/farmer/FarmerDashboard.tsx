@@ -515,64 +515,14 @@ const FarmerDashboard = () => {
       <footer className="py-6 border-t border-border/50 mt-auto bg-background">
         <div className="container mx-auto px-4 text-center">
           <p className="text-xs text-muted-foreground">
-            © 2024 AgriLink Farmer Portal. All produce data is secured.
+            © {new Date().getFullYear()} AgriLink Farmer Portal. All produce data is secured.
           </p>
         </div>
       </footer>
+
     </div>
   );
 };
 
 export default FarmerDashboard;
 
-      {/* Add/Edit Dialog */}
-      <ProduceListingDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        listing={editingListing}
-        onSubmit={handleSubmit}
-        onUploadImage={uploadImage}
-        onSuccess={refetch}
-      />
-
-      {/* Chat Dialog */}
-      {selectedChatUser && (
-        <ChatDialog
-          open={chatDialogOpen}
-          onOpenChange={setChatDialogOpen}
-          receiverId={selectedChatUser.id}
-          receiverName={selectedChatUser.name}
-        />
-      )}
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Listing</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this listing? This action cannot be undone and will remove it from the marketplace.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete Listing
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Simple Dashboard Footer */}
-      <footer className="py-6 border-t border-border/50 mt-auto bg-background">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            © 2024 AgriLink Farmer Portal. All produce data is secured.
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-export default FarmerDashboard;

@@ -415,10 +415,11 @@ const BuyerDashboard = () => {
        <footer className="py-6 border-t border-border/50 mt-auto bg-background">
          <div className="container mx-auto px-4 text-center">
            <p className="text-xs text-muted-foreground">
-             © 2024 AgriLink Buyer Portal. All purchases are protected by AgriLink FairTrade.
+             © {new Date().getFullYear()} AgriLink Buyer Portal. All purchases are protected by AgriLink FairTrade.
            </p>
          </div>
        </footer>
+
      </div>
    );
  }; 
