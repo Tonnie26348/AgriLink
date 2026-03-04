@@ -61,18 +61,15 @@ export const useProfile = () => {
       setLoading(true);
       
       // Filter out fields that shouldn't be updated or cause issues
-      const cleanUpdates = {
-        full_name: updates.full_name,
-        phone: updates.phone,
-        location: updates.location,
-        avatar_url: updates.avatar_url,
-        updated_at: new Date().toISOString(),
-      };
-
-      // Remove undefined values
-      Object.keys(cleanUpdates).forEach(
-        key => (cleanUpdates as any)[key] === undefined && delete (cleanUpdates as any)[key]
-      );
+      // and remove undefined values to avoid Supabase errors
+      const cleanUpdates: Record<string, string | null> = {};
+      
+      if (updates.full_name !== undefined) cleanUpdates.full_name = updates.full_name;
+      if (updates.phone !== undefined) cleanUpdates.phone = updates.phone;
+      if (updates.location !== undefined) cleanUpdates.location = updates.location;
+      if (updates.avatar_url !== undefined) cleanUpdates.avatar_url = updates.avatar_url;
+      
+      cleanUpdates.updated_at = new Date().toISOString();
 
       const { data, error } = await supabase
         .from("profiles")
