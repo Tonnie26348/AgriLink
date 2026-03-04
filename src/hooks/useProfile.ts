@@ -60,15 +60,24 @@ export const useProfile = () => {
     try {
       setLoading(true);
       
+      // Filter out fields that shouldn't be updated or cause issues
+      const cleanUpdates = {
+        full_name: updates.full_name,
+        phone: updates.phone,
+        location: updates.location,
+        avatar_url: updates.avatar_url,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Remove undefined values
+      Object.keys(cleanUpdates).forEach(
+        key => (cleanUpdates as any)[key] === undefined && delete (cleanUpdates as any)[key]
+      );
+
       const { data, error } = await supabase
         .from("profiles")
-        .upsert({
-          ...updates,
-          user_id: user.id,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id'
-        })
+        .update(cleanUpdates)
+        .eq("user_id", user.id)
         .select()
         .single();
 
