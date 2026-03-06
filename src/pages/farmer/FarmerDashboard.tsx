@@ -28,6 +28,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PriceInsights } from "@/components/insights/PriceInsights";
+import AIDiagnosisDialog from "@/components/farmer/AIDiagnosisDialog";
+import { format } from "date-fns";
 import { 
   Leaf, 
   Plus, 
@@ -47,14 +49,19 @@ import {
   UserCircle,
   MessageSquare,
   Bot,
-  Sparkles
+  Sparkles,
+  Camera,
+  ShieldCheck,
+  AlertTriangle,
+  Calendar as CalendarIcon
+} from "lucide-react";
 } from "lucide-react";
 
 const FarmerDashboard = () => {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "messages" | "ai-insights">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "messages" | "ai-insights" | "calendar">("overview");
 
   const { 
     listings, 
@@ -74,6 +81,7 @@ const FarmerDashboard = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const [isDiagnosisOpen, setIsDiagnosisOpen] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState<{ id: string; name: string } | null>(null);
 
@@ -146,6 +154,7 @@ const FarmerDashboard = () => {
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "inventory", label: "Inventory", icon: Package },
     { id: "orders", label: "Orders", icon: ShoppingCart },
+    { id: "calendar", label: "Harvests", icon: CalendarIcon },
     { id: "ai-insights", label: "AI Insights", icon: Bot },
     { id: "messages", label: "Messages", icon: MessageSquare },
   ] as const;
@@ -229,10 +238,16 @@ const FarmerDashboard = () => {
                     Performance summary and recent activity
                   </p>
                 </div>
-                <Button onClick={handleAddNew} size="lg" className="shadow-soft">
-                  <Plus className="w-5 h-5 mr-2" />
-                  Add New Listing
-                </Button>
+                <div className="flex gap-3">
+                  <Button onClick={() => setIsDiagnosisOpen(true)} variant="outline" className="shadow-soft gap-2 border-primary/30 text-primary">
+                    <Camera className="w-5 h-5" />
+                    Plant Doctor
+                  </Button>
+                  <Button onClick={handleAddNew} size="lg" className="shadow-soft">
+                    <Plus className="w-5 h-5 mr-2" />
+                    Add New Listing
+                  </Button>
+                </div>
               </div>
 
               {/* Stats Grid */}
@@ -255,17 +270,74 @@ const FarmerDashboard = () => {
               </div>
 
               <div className="grid lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 shadow-soft border-border/50">
-                  <CardHeader className="pb-3 border-b border-border/10">
-                    <CardTitle className="text-xl">Sales Insights</CardTitle>
-                    <CardDescription>Your revenue and performance trends</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <SalesAnalytics orders={orders} />
-                  </CardContent>
-                </Card>
+                <div className="lg:col-span-2 space-y-6">
+                  {/* AI Plant Doctor Banner */}
+                  <Card className="bg-gradient-to-r from-primary/90 to-primary text-primary-foreground overflow-hidden shadow-glow border-none">
+                    <CardContent className="p-8 relative">
+                      <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-soft shrink-0">
+                          <ShieldCheck className="w-8 h-8" />
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                          <h2 className="text-xl font-display font-bold mb-1">AI Plant Doctor</h2>
+                          <p className="text-primary-foreground/80 text-sm mb-4 max-w-md">
+                            Upload a photo of your crops to get instant disease diagnosis 
+                            and organic treatment recommendations.
+                          </p>
+                          <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="shadow-soft gap-2 h-10 px-6"
+                            onClick={() => setIsDiagnosisOpen(true)}
+                          >
+                            <Camera className="w-4 h-4" />
+                            Start Diagnosis
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="shadow-soft border-border/50">
+                    <CardHeader className="pb-3 border-b border-border/10">
+                      <CardTitle className="text-xl">Sales Insights</CardTitle>
+                      <CardDescription>Your revenue and performance trends</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <SalesAnalytics orders={orders} />
+                    </CardContent>
+                  </Card>
+                </div>
 
                 <div className="space-y-6">
+                  {/* Low Stock Alerts */}
+                  {listings.filter(l => l.quantity_available <= 10).length > 0 && (
+                    <Card className="border-amber-200 bg-amber-50/30 shadow-none">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-bold text-amber-800 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          Low Stock Alerts
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {listings
+                          .filter(l => l.quantity_available <= 10)
+                          .map(l => (
+                            <div key={l.id} className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-amber-100 shadow-sm">
+                              <div>
+                                <p className="text-xs font-bold text-foreground">{l.name}</p>
+                                <p className="text-[10px] text-amber-600 font-medium">{l.quantity_available} {l.unit} remaining</p>
+                              </div>
+                              <Button size="icon" variant="ghost" className="h-8 w-8 text-amber-600 hover:bg-amber-100" onClick={() => handleEdit(l)}>
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ))}
+                      </CardContent>
+                    </Card>
+                  )}
+
                   <Card className="shadow-soft border-border/50 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
                       <Sparkles className="w-12 h-12 text-primary" />
@@ -443,6 +515,52 @@ const FarmerDashboard = () => {
             </Card>
           )}
 
+          {activeTab === "calendar" && (
+            <Card className="shadow-soft border-border/50">
+              <CardHeader className="pb-3 border-b border-border/10">
+                <CardTitle className="text-2xl">Harvest Calendar</CardTitle>
+                <CardDescription>Track upcoming harvests and plan your listings</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-6">
+                  {listings.filter(l => l.harvest_date).length === 0 ? (
+                    <div className="text-center py-12">
+                      <CalendarIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-20" />
+                      <p className="text-muted-foreground">No upcoming harvests scheduled</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {listings
+                        .filter(l => l.harvest_date)
+                        .sort((a, b) => new Date(a.harvest_date!).getTime() - new Date(b.harvest_date!).getTime())
+                        .map((listing) => {
+                          const harvestDate = new Date(listing.harvest_date!);
+                          const isUpcoming = harvestDate > new Date();
+                          return (
+                            <div key={listing.id} className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/50">
+                              <div className="flex flex-col items-center justify-center w-16 h-16 rounded-xl bg-background border border-border/50 shadow-sm">
+                                <span className="text-[10px] uppercase font-bold text-primary">{format(harvestDate, "MMM")}</span>
+                                <span className="text-xl font-bold text-foreground">{format(harvestDate, "dd")}</span>
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-bold text-foreground">{listing.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {isUpcoming ? "Scheduled Harvest" : "Harvested"} • {listing.quantity_available} {listing.unit} expected
+                                </p>
+                              </div>
+                              <Badge variant={isUpcoming ? "default" : "secondary"}>
+                                {isUpcoming ? "Upcoming" : "Past"}
+                              </Badge>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {activeTab === "ai-insights" && (
             <div className="animate-fade-in">
               <Link to="/ai-insights" className="block">
@@ -492,6 +610,12 @@ const FarmerDashboard = () => {
           receiverName={selectedChatUser.name}
         />
       )}
+
+      {/* AI Plant Doctor Dialog */}
+      <AIDiagnosisDialog
+        open={isDiagnosisOpen}
+        onOpenChange={setIsDiagnosisOpen}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

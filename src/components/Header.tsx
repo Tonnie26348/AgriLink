@@ -91,14 +91,15 @@ const Header = () => {
                 <Link to={userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard"}>
                   <Button variant="ghost">Dashboard</Button>
                 </Link>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  title="Messages"
-                  onClick={() => setIsMessagesOpen(true)}
-                >
-                  <MessageSquare className="w-5 h-5" />
-                </Button>
+                <Link to="/inbox">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    title="Messages"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                  </Button>
+                </Link>
                 <Link to="/orders">
                   <Button variant="ghost" size="icon" title="Orders">
                     <ClipboardList className="w-5 h-5" />
@@ -188,17 +189,15 @@ const Header = () => {
                     <Link to={userRole === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard"}>
                       <Button variant="ghost" className="w-full justify-center">Dashboard</Button>
                     </Link>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-center"
-                      onClick={() => {
-                        setIsMessagesOpen(true);
-                        setIsOpen(false);
-                      }}
-                    >
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Messages
-                    </Button>
+                    <Link to="/inbox" onClick={() => setIsOpen(false)}>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-center"
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Messages
+                      </Button>
+                    </Link>
                     <Link to="/orders">
                       <Button variant="ghost" className="w-full justify-center">Orders</Button>
                     </Link>

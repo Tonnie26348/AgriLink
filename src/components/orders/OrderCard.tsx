@@ -1,4 +1,7 @@
+import { useState, useEffect } from "react";
 import { Order, OrderStatus } from "@/hooks/useOrders";
+import { supabase } from "@/integrations/supabase/client";
+import OrderReviewDialog from "./OrderReviewDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,9 +68,28 @@ interface OrderCardProps {
 }
 
 const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
+
   const statusConfig = STATUS_CONFIG[order.status];
   const StatusIcon = statusConfig.icon;
   const availableStatuses = NEXT_STATUS[order.status] || [];
+
+  useEffect(() => {
+    if (order.status === "delivered" && viewAs === "buyer") {
+      checkReviewStatus();
+    }
+  }, [order.id, order.status, viewAs]);
+
+  const checkReviewStatus = async () => {
+    const { data } = await supabase
+      .from("reviews")
+      .select("id")
+      .eq("order_id", order.id)
+      .maybeSingle();
+    
+    if (data) setHasReviewed(true);
+  };
 
   return (
     <Card className="overflow-hidden">
@@ -88,10 +110,27 @@ const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
               })}
             </p>
           </div>
-          <Badge variant="outline" className={statusConfig.className}>
-            <StatusIcon className="w-3 h-3 mr-1" />
-            {statusConfig.label}
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant="outline" className={statusConfig.className}>
+              <StatusIcon className="w-3 h-3 mr-1" />
+              {statusConfig.label}
+            </Badge>
+            {order.status === "delivered" && viewAs === "buyer" && !hasReviewed && (
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="h-7 text-[10px] bg-yellow-400/10 text-yellow-600 hover:bg-yellow-400/20 border-yellow-400/20"
+                onClick={() => setReviewDialogOpen(true)}
+              >
+                Rate Order
+              </Button>
+            )}
+            {hasReviewed && (
+              <Badge variant="outline" className="h-7 text-[10px] bg-green-500/10 text-green-600 border-green-500/20">
+                Reviewed
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Buyer/Farmer Info */}
@@ -185,6 +224,14 @@ const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
           )}
         </div>
       </CardContent>
+      
+      <OrderReviewDialog
+        orderId={order.id}
+        farmerId={order.farmer_id}
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        onSuccess={() => setHasReviewed(true)}
+      />
     </Card>
   );
 };

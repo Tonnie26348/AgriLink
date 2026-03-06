@@ -15,6 +15,7 @@ import FarmerDashboard from "@/pages/farmer/FarmerDashboard";
 import BuyerDashboard from "@/pages/buyer/BuyerDashboard";
 import ProfilePage from "./pages/Profile";
 import OrdersPage from "./pages/OrdersPage";
+import Inbox from "./pages/Inbox";
 import AIInsightsPage from "./pages/AIInsightsPage";
 import FeaturesPage from "./pages/FeaturesPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -69,6 +70,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <OrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inbox"
+                element={
+                  <ProtectedRoute>
+                    <Inbox />
                   </ProtectedRoute>
                 }
               />
