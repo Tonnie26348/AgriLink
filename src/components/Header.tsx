@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose 
 import { Menu, Leaf, LogOut, Tractor, ShoppingBag, UserCircle, ClipboardList, MessageSquare, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context-definition";
 import CartSheet from "@/components/cart/CartSheet";
+import NotificationsCenter from "@/components/NotificationsCenter";
 import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 import MessagesDialog from "@/components/marketplace/MessagesDialog";
 
@@ -98,6 +99,7 @@ const Header = () => {
                       {userRole === "farmer" ? <Tractor className="w-4 h-4 text-secondary" /> : <ShoppingBag className="w-4 h-4 text-secondary" />}
                     </div>
                   </Button>
+                  <NotificationsCenter />
                   <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsMessagesOpen(true)} title="Messages">
                     <MessageSquare className="w-5 h-5 text-muted-foreground" />
                   </Button>
@@ -122,7 +124,8 @@ const Header = () => {
           </div>
 
           {/* Mobile Menu Trigger */}
-          <div className="flex items-center gap-4 md:hidden">
+          <div className="flex items-center gap-2 md:hidden">
+            <NotificationsCenter />
             <CartSheet />
             <Sheet>
               <SheetTrigger asChild>
