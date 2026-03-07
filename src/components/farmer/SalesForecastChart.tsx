@@ -18,9 +18,21 @@ interface SalesForecastChartProps {
   historicalData: { month: string; sales: number }[];
 }
 
+interface ForecastPoint {
+  month: string;
+  sales: number;
+  isForecast?: boolean;
+}
+
+type SalesDataPoint = {
+  month: string;
+  sales: number;
+  isForecast?: boolean;
+};
+
 const SalesForecastChart = ({ historicalData }: SalesForecastChartProps) => {
   const { user } = useAuth();
-  const [data, setData] = useState<any[]>(historicalData);
+  const [data, setData] = useState<SalesDataPoint[]>(historicalData);
   const [loading, setLoading] = useState(false);
   const [forecasted, setForecasted] = useState(false);
   const [insight, setInsight] = useState("");
@@ -41,7 +53,7 @@ const SalesForecastChart = ({ historicalData }: SalesForecastChartProps) => {
 
       if (response && response.forecast) {
         const newData = [...historicalData];
-        response.forecast.forEach((f: any) => {
+        response.forecast.forEach((f: ForecastPoint) => {
           newData.push({
             month: f.month,
             sales: f.sales,
@@ -127,7 +139,7 @@ const SalesForecastChart = ({ historicalData }: SalesForecastChartProps) => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                 <Tooltip 
                   contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
-                  formatter={(value: number, name: string, props: any) => {
+                  formatter={(value: number, _name: string, props: { payload: SalesDataPoint }) => {
                     return [`Ksh ${value.toLocaleString()}`, props.payload.isForecast ? "AI Forecast" : "Actual Sales"];
                   }}
                 />

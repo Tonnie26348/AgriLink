@@ -67,9 +67,10 @@ serve(async (req) => {
     return new Response(JSON.stringify(stkResult), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
-    console.error("M-Pesa Error:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+    console.error("M-Pesa Error:", errorMessage);
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

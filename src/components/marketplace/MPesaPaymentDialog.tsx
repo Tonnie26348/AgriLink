@@ -67,11 +67,11 @@ const MPesaPaymentDialog = ({
       } else {
         throw new Error(data.ResponseDescription || "Failed to initiate M-Pesa payment");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("M-Pesa error:", error);
       toast({
         title: "Payment initiation failed",
-        description: error.message || "An unexpected error occurred",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
       setStep("input");
