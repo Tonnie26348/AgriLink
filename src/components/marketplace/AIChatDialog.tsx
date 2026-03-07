@@ -65,14 +65,17 @@ const AIChatDialog = ({ open, onOpenChange, initialMessage }: AIChatDialogProps)
       if (error) {
         let errorMessage = "I'm sorry, I encountered an error. Please try again.";
         try {
-          // Some errors come back as objects with a message
-          if (typeof error === 'object' && 'message' in error) {
-            errorMessage = (error as any).message;
+          // Check for standard Error object with message
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          } else if (typeof error === 'object' && error !== null && 'message' in error) {
+            errorMessage = String((error as { message: unknown }).message);
           }
           
-          // Try to see if there's a more specific error in the response context
-          if (error.context && typeof error.context.json === 'function') {
-            const body = await error.context.json();
+          // Check for Supabase Edge Function error context
+          const errWithContext = error as { context?: { json: () => Promise<{ error?: string }> } };
+          if (errWithContext.context && typeof errWithContext.context.json === 'function') {
+            const body = await errWithContext.context.json();
             if (body && body.error) errorMessage = body.error;
           }
         } catch (e) {
