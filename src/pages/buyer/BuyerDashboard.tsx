@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 
 import MarketInsightsCard from "@/components/marketplace/MarketInsightsCard";
+import OnboardingTour from "@/components/OnboardingTour";
 
 const BuyerDashboard = () => {
   const { signOut } = useAuth();
@@ -94,6 +95,7 @@ const BuyerDashboard = () => {
 
    return (
      <div className="min-h-screen bg-muted/30 flex flex-col font-sans">
+       <OnboardingTour />
        {/* Dedicated Buyer Header */}
        <header className="bg-background/80 backdrop-blur-xl border-b border-border/40 h-16 md:h-20 sticky top-0 z-50 transition-all duration-300">
          <div className="container mx-auto px-4 h-full flex items-center justify-between">

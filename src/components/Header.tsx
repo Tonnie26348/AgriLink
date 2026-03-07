@@ -101,6 +101,7 @@ const Header = () => {
                     </div>
                   </Button>
                   <NotificationsCenter />
+                  <LanguageSwitcher />
                   <ThemeToggle />
                   <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsMessagesOpen(true)} title="Messages">
                     <MessageSquare className="w-5 h-5 text-muted-foreground" />

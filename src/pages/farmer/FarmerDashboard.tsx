@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PriceInsights } from "@/components/insights/PriceInsights";
 import AIDiagnosisDialog from "@/components/farmer/AIDiagnosisDialog";
+import OnboardingTour from "@/components/OnboardingTour";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { useMemo } from "react";
 import { 
@@ -188,6 +189,7 @@ const FarmerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col font-sans">
+      <OnboardingTour />
       {/* Dedicated Dashboard Header */}
       <header className="bg-background/80 backdrop-blur-xl border-b border-border/40 h-16 md:h-20 sticky top-0 z-50 transition-all duration-300">
         <div className="container mx-auto px-4 h-full flex items-center justify-between">

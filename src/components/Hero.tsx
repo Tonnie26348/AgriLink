@@ -2,7 +2,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, TrendingUp, Shield, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 const Hero = () => {
+  const { t } = useLanguage();
   const stats = [
     { icon: Users, value: "10K+", label: "Farmers Connected" },
     { icon: TrendingUp, value: "40%", label: "Income Increase" },
@@ -43,21 +46,12 @@ const Hero = () => {
 
           {/* Heading */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold leading-tight mb-8 animate-fade-in delay-100 text-white drop-shadow-sm">
-            Connect Farm to <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-secondary relative">
-              Market Directly
-              <svg className="absolute -bottom-2 left-0 w-full h-3 text-accent opacity-50" viewBox="0 0 100 10" preserveAspectRatio="none">
-                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="2" fill="none" />
-              </svg>
-            </span>
+            {t("hero.title")}
           </h1>
 
           {/* Subheading */}
           <p className="text-lg md:text-xl text-gray-100 mb-10 max-w-2xl mx-auto animate-fade-in delay-200 leading-relaxed font-light">
-            AgriLink eliminates middlemen by bridging farmers and buyers with 
-            <span className="font-semibold text-white"> transparent pricing</span>, 
-            <span className="font-semibold text-white"> AI-powered insights</span>, and 
-            <span className="font-semibold text-white"> secure direct trade</span>.
+            {t("hero.subtitle")}
           </p>
 
           {/* CTAs */}
