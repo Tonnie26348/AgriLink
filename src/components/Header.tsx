@@ -7,10 +7,13 @@ import { useAuth } from "@/contexts/auth-context-definition";
 import CartSheet from "@/components/cart/CartSheet";
 import NotificationsCenter from "@/components/NotificationsCenter";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/hooks/use-language";
 import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 import MessagesDialog from "@/components/marketplace/MessagesDialog";
 
 const Header = () => {
+  const { t } = useLanguage();
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
@@ -18,12 +21,10 @@ const Header = () => {
   const scrollToSection = useScrollToSection();
 
   const navLinks = [
-    { label: "Home", to: "/" },
-    { label: "Features", to: "/#features" },
-    { label: "How It Works", to: "/#how-it-works" },
-    { label: "AI Insights", to: "/#ai-insights" },
-    { label: "Impact", to: "/#impact" },
-    { label: "Marketplace", to: "/marketplace" },
+    { label: t("nav.home"), to: "/" },
+    { label: t("nav.marketplace"), to: "/marketplace" },
+    { label: t("nav.ai_insights"), to: "/#ai-insights" },
+    { label: t("nav.impact"), to: "/#impact" },
   ];
 
   const handleSignOut = async () => {
