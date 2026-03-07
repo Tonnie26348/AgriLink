@@ -92,7 +92,7 @@ const OrderCard = ({ order, viewAs, onUpdateStatus }: OrderCardProps) => {
   }, [order.id, order.status, viewAs, checkReviewStatus]);
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/20">
       <CardContent className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
