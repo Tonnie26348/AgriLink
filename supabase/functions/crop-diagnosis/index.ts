@@ -44,13 +44,10 @@ serve(async (req) => {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this plant image and return JSON: {crop_type, diagnosis, confidence, treatment_advice}" },
+            { text: "Analyze this plant image and return ONLY a JSON object: { \"crop_type\": \"string\", \"diagnosis\": \"string\", \"confidence\": number, \"treatment_advice\": \"string\" }" },
             { inline_data: { mime_type: "image/jpeg", data: base64Image } }
           ]
-        }],
-        generationConfig: { 
-          response_mime_type: "application/json"
-        }
+        }]
       }),
     });
 
@@ -60,7 +57,12 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    const diagnosis = JSON.parse(result.candidates[0].content.parts[0].text);
+    let diagnosisText = result.candidates[0].content.parts[0].text;
+    
+    // Clean up markdown if Gemini adds it
+    diagnosisText = diagnosisText.replace(/```json\n?|\n?```/g, "").trim();
+    
+    const diagnosis = JSON.parse(diagnosisText);
 
     return new Response(JSON.stringify({ success: true, diagnosis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
