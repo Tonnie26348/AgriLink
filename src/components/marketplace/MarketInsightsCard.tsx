@@ -11,12 +11,19 @@ interface MarketTrend {
   priceRange: string;
 }
 
+interface CropRecommendation {
+  name: string;
+  reason: string;
+  timeToHarvest: string;
+}
+
 const MarketInsightsCard = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<{
     marketOverview: string;
     topPerformers: MarketTrend[];
     seasonalAdvice: string;
+    recommendations?: CropRecommendation[];
   } | null>(null);
 
   const fetchInsights = async () => {
@@ -106,6 +113,28 @@ const MarketInsightsCard = () => {
                 ))}
               </div>
             </div>
+
+            {data.recommendations && (
+              <div className="space-y-3 pt-4 border-t border-border/50">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2">
+                  <TrendingUp className="w-3 h-3" />
+                  Best Future Deals
+                </h4>
+                <div className="grid gap-2">
+                  {data.recommendations.map((rec) => (
+                    <div key={rec.name} className="p-3 rounded-lg bg-secondary/5 border border-secondary/10 group hover:bg-secondary/10 transition-colors">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-bold text-foreground">{rec.name}</span>
+                        <Badge variant="outline" className="text-[9px] border-secondary/30 text-secondary bg-secondary/5">
+                          In {rec.timeToHarvest}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-tight">{rec.reason}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mt-auto pt-4 border-t border-border/50">
               <p className="text-xs italic text-muted-foreground flex items-center gap-2">

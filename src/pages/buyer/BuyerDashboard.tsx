@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 
 import MarketInsightsCard from "@/components/marketplace/MarketInsightsCard";
+import AIAssistantCard from "@/components/marketplace/AIAssistantCard";
 import OnboardingTour from "@/components/OnboardingTour";
 
 const BuyerDashboard = () => {
@@ -244,6 +245,7 @@ const BuyerDashboard = () => {
                 </Card>
 
                 <div className="space-y-6">
+                  <AIAssistantCard />
                   <MarketInsightsCard />
                   
                   <Card className="shadow-soft border-border/50">

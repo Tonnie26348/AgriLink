@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth-context-definition";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   XAxis,
   YAxis,
@@ -21,6 +22,7 @@ interface SalesForecastChartProps {
 interface ForecastPoint {
   month: string;
   sales: number;
+  confidence: number;
   isForecast?: boolean;
 }
 
@@ -36,6 +38,8 @@ const SalesForecastChart = ({ historicalData }: SalesForecastChartProps) => {
   const [loading, setLoading] = useState(false);
   const [forecasted, setForecasted] = useState(false);
   const [insight, setInsight] = useState("");
+  const [trend, setTrend] = useState<"Growing" | "Stable" | "Declining" | "">("");
+  const [recommendations, setRecommendations] = useState<string[]>([]);
 
   const handleForecast = async () => {
     if (!user) return;
@@ -62,6 +66,8 @@ const SalesForecastChart = ({ historicalData }: SalesForecastChartProps) => {
         });
         setData(newData);
         setInsight(response.insight);
+        setTrend(response.trend);
+        setRecommendations(response.recommendations || []);
         setForecasted(true);
       }
     } catch (error) {
@@ -75,6 +81,8 @@ const SalesForecastChart = ({ historicalData }: SalesForecastChartProps) => {
     setData(historicalData);
     setForecasted(false);
     setInsight("");
+    setTrend("");
+    setRecommendations([]);
   };
 
   return (
@@ -170,17 +178,46 @@ const SalesForecastChart = ({ historicalData }: SalesForecastChartProps) => {
           </div>
         )}
         
-        {insight && (
-          <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10 animate-fade-in">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-primary mt-0.5" />
-              <div>
-                <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">AI Market Insight</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {insight}
-                </p>
+        {forecasted && (
+          <div className="mt-4 space-y-4 animate-fade-in">
+            {insight && (
+              <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-xs font-bold text-primary uppercase tracking-wider">AI Market Insight</p>
+                      {trend && (
+                        <Badge variant="outline" className={`text-[10px] h-4 px-1.5 ${
+                          trend === 'Growing' ? 'text-green-600 border-green-200 bg-green-50' :
+                          trend === 'Declining' ? 'text-red-600 border-red-200 bg-red-50' :
+                          'text-blue-600 border-blue-200 bg-blue-50'
+                        }`}>
+                          {trend} Trend
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {insight}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            {recommendations.length > 0 && (
+              <div className="grid gap-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Actionable Recommendations</p>
+                {recommendations.map((rec, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50 text-sm group hover:border-primary/30 transition-colors">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
+                      {i + 1}
+                    </div>
+                    {rec}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
