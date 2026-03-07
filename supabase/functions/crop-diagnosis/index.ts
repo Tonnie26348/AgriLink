@@ -38,16 +38,19 @@ serve(async (req) => {
     const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
     // 3. Call Gemini
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this plant image and return ONLY a JSON object: { \"crop_type\": \"string\", \"diagnosis\": \"string\", \"confidence\": number, \"treatment_advice\": \"string\" }" },
+            { text: "Analyze this plant image and return a JSON object: { \"crop_type\": \"string\", \"diagnosis\": \"string\", \"confidence\": number, \"treatment_advice\": \"string\" }" },
             { inline_data: { mime_type: "image/jpeg", data: base64Image } }
           ]
-        }]
+        }],
+        generationConfig: {
+          response_mime_type: "application/json",
+        }
       }),
     });
 
