@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, TrendingUp, Shield, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/use-language";
 
 const Hero = () => {
   const { t } = useLanguage();
