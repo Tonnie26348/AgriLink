@@ -61,8 +61,6 @@ const CartSheet = () => {
 
     try {
       // Create separate orders for each farmer
-      const lastCreatedOrderId = null;
-      
       for (const [farmerId, group] of farmerGroups) {
         const success = await createOrder({
           farmer_id: farmerId,
