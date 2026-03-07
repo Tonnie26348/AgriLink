@@ -49,6 +49,15 @@ vi.mock("@/hooks/use-toast", () => ({
   }),
 }));
 
+// Mock the useLanguage hook
+vi.mock("@/hooks/use-language", () => ({
+  useLanguage: () => ({
+    t: (key: string) => key,
+    language: "en",
+    setLanguage: vi.fn(),
+  }),
+}));
+
 describe("Login Page", () => {
   it("should render the login form", () => {
     render(
