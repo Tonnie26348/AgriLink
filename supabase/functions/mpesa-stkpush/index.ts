@@ -38,8 +38,11 @@ serve(async (req) => {
     const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
     const password = btoa(shortCode + passkey + timestamp);
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const callbackUrl = `${supabaseUrl}/functions/v1/mpesa-callback?orderId=${orderId}`;
+
     const stkResponse = await fetch(
-      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/query", // Change to process in production
+      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", // Changed from query to processrequest
       {
         method: "POST",
         headers: {
@@ -55,7 +58,7 @@ serve(async (req) => {
           PartyA: formattedPhone,
           PartyB: shortCode,
           PhoneNumber: formattedPhone,
-          CallBackURL: `https://your-project.supabase.co/functions/v1/mpesa-callback?orderId=${orderId}`,
+          CallBackURL: callbackUrl,
           AccountReference: `Order ${orderId.slice(0, 8)}`,
           TransactionDesc: "Payment for AgriLink Produce",
         }),

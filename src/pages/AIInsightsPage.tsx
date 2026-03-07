@@ -19,6 +19,11 @@ interface MarketInsight {
     level: number;
     topCrops: string[];
   }>;
+  recommendations: Array<{
+    name: string;
+    reason: string;
+    timeToHarvest: string;
+  }>;
 }
 
 const AIInsightsPage = () => {
@@ -104,6 +109,28 @@ const AIInsightsPage = () => {
                   </Card>
 
                   <DemandHeatmap data={insight.demandHeatmap} />
+
+                  {insight.recommendations && (
+                    <div className="mt-12 pt-8 border-t border-border/50">
+                      <h2 className="text-2xl font-display font-bold text-foreground mb-6 flex items-center gap-2">
+                        <Target className="text-primary w-6 h-6" />
+                        Smart Planting Recommendations
+                      </h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {insight.recommendations.map((rec, i) => (
+                          <Card key={i} className="border-primary/20 bg-primary/5 hover:border-primary/40 transition-all group overflow-hidden">
+                            <CardContent className="pt-6">
+                              <Badge variant="outline" className="mb-3 bg-primary/10 border-primary/20 text-primary">
+                                {rec.timeToHarvest} to harvest
+                              </Badge>
+                              <h4 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors">{rec.name}</h4>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{rec.reason}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : null}
 

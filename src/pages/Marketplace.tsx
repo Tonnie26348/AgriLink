@@ -217,23 +217,30 @@ const Marketplace = () => {
                   </div>
                 </div>
 
-                {/* Location Filter */}
-                {locations.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Location</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
-                      {locations.map((loc) => (
-                        <label key={loc} className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 cursor-pointer group">
-                          <Checkbox 
-                            checked={selectedLocations.includes(loc)}
-                            onCheckedChange={() => handleLocationToggle(loc)}
-                          />
-                          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{loc}</span>
-                        </label>
-                      ))}
-                    </div>
+                {/* Rating Filter */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Minimum Rating</h3>
+                  <div className="flex items-center gap-2">
+                    {[4, 3, 2, 1].map((star) => (
+                      <Button
+                        key={star}
+                        variant="outline"
+                        size="sm"
+                        className={`flex-1 gap-1 rounded-lg ${star === 4 ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : ''}`}
+                      >
+                        {star}<Star className="w-3 h-3 fill-current" />
+                      </Button>
+                    ))}
                   </div>
-                )}
+                </div>
+
+                {/* Availability Filter */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">In Stock Only</h3>
+                    <Checkbox id="in-stock" defaultChecked />
+                  </div>
+                </div>
               </div>
             </div>
           </aside>

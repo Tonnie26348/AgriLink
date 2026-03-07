@@ -27,11 +27,29 @@ serve(async (req) => {
     
     if (mode === "general") {
       // General Market Analysis Mode
-      const { data: topStats } = await supabaseClient.rpc('get_system_stats');
+      let farmerCount = 10000;
+      let buyerCount = 2800;
+
+      try {
+        const { data: topStats, error: rpcError } = await supabaseClient.rpc('get_system_stats');
+        if (!rpcError && topStats) {
+          farmerCount = topStats.farmerCount || farmerCount;
+          buyerCount = topStats.buyerCount || buyerCount;
+        }
+      } catch (err) {
+        console.warn("Failed to fetch system stats, using defaults:", err);
+      }
       
-      prompt = `You are an AgriLink Market Analyst.
+      prompt = `You are an expert AgriLink Market & Agricultural Consultant specializing in Kenya.
 Analyze the current Kenyan agricultural market for ${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}.
-Platform Context: ${topStats?.[0]?.total_farmers || 10000}+ farmers, ${topStats?.[0]?.total_buyers || 2800}+ buyers.
+Platform Context: ${farmerCount}+ farmers, ${buyerCount}+ buyers.
+
+Tasks:
+1. Provide a market overview.
+2. Identify top performing crops.
+3. Provide seasonal advice.
+4. Suggest a demand heatmap by region.
+5. RECOMMEND the top 3 crops to plant RIGHT NOW based on predicted demand in 3-4 months.
 
 Return a JSON object exactly like this:
 {
@@ -39,9 +57,12 @@ Return a JSON object exactly like this:
   "topPerformers": [
     { "name": "Crop Name", "trend": "Rising" | "Stable" | "Falling", "priceRange": "Ksh XX - YY" }
   ],
-  "seasonalAdvice": "1 sentence advice for farmers this month",
+  "seasonalAdvice": "Specific actionable advice for this month",
   "demandHeatmap": [
     { "region": "Region Name", "level": number (1-100), "topCrops": ["Crop1", "Crop2"] }
+  ],
+  "recommendations": [
+    { "name": "Crop Name", "reason": "Why it's recommended", "timeToHarvest": "months" }
   ]
 }`;
     } else {

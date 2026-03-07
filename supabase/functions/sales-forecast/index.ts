@@ -24,21 +24,27 @@ serve(async (req) => {
       throw new Error("GEMINI_API_KEY is not set");
     }
 
-    const prompt = `You are an AgriLink Sales Analyst.
+    const prompt = `You are an expert AgriLink Sales & Market Analyst specializing in Kenyan agriculture.
 Based on this historical sales data for a farmer:
 ${JSON.stringify(history)}
 Farmer ID: ${farmerId}
 Crop Type: ${cropType || 'General Produce'}
+Current Month: ${new Date().toLocaleString('default', { month: 'long' })}
 
-Forecast sales for the next 3 months.
-Return a JSON object:
+Tasks:
+1. Forecast sales (volume in units/Ksh) for the next 4 months considering typical Kenyan agricultural seasons (Long rains, short rains, dry periods).
+2. Identify if there's a growing, stable, or declining trend.
+3. Provide 3 specific, actionable recommendations for the farmer to optimize their revenue (e.g., when to harvest, when to increase supply, when to pivot).
+
+Return a JSON object exactly like this:
 {
   "forecast": [
-    {"month": "MonthName", "sales": number},
-    {"month": "MonthName", "sales": number},
-    {"month": "MonthName", "sales": number}
+    {"month": "MonthName", "sales": number, "confidence": float (0-1)},
+    ... (4 months)
   ],
-  "insight": "1-2 short sentences about trends and advice."
+  "trend": "Growing" | "Stable" | "Declining",
+  "insight": "A comprehensive summary of the forecast (2-3 sentences).",
+  "recommendations": ["Recommendation 1", "Recommendation 2", "Recommendation 3"]
 }`;
 
     const response = await fetch(

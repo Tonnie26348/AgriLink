@@ -19,6 +19,8 @@ import {
   XCircle,
   ChevronDown,
   MapPin,
+  Star,
+  UserCircle,
 } from "lucide-react";
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; icon: typeof Clock; className: string }> = {
