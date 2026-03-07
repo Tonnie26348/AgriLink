@@ -1,147 +1,194 @@
-import { Bot, TrendingUp, Calendar, Target, Users, DollarSign } from "lucide-react"; // Updated imports
+import { Bot, TrendingUp, Calendar, Target, Users, DollarSign, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const insights = [
   {
     icon: TrendingUp,
-    title: "Price Ranges",
-    description: "Get AI-suggested price ranges (minimum and maximum) based on historical market data and seasonal patterns.",
-    sample: "Tomatoes: Ksh 40-50/kg (suggested range for current season)",
+    title: "Dynamic Price Ranges",
+    description: "Get AI-suggested price ranges based on historical market data and seasonal shifts.",
+    sample: "Tomatoes: Ksh 40-50/kg",
+    color: "primary"
   },
   {
     icon: Target,
-    title: "Demand Indicators",
-    description: "See real-time demand levels (High, Medium, Low) to make informed pricing decisions.",
-    sample: "Tomatoes: High demand | Market price within range",
+    title: "Real-time Demand",
+    description: "Instant demand level indicators (High, Medium, Low) to help you time your sales perfectly.",
+    sample: "High Demand | Meru Region",
+    color: "secondary"
   },
   {
     icon: Calendar,
     title: "Market Transparency",
-    description: "Access historical trend data and regional pricing patterns to reduce exploitation and improve fair pricing.",
-    sample: "Transparent pricing helps you negotiate confidently",
+    description: "Access regional pricing patterns to negotiate with confidence and secure fair value.",
+    sample: "Fair Trade Verified",
+    color: "accent"
   },
 ];
 
 const keyMetrics = [
   {
     icon: DollarSign,
-    title: "Today's Best Price",
+    title: "Market Benchmark",
     value: "Ksh 45/kg",
-    description: "AI-suggested optimal price for your produce.",
+    description: "Optimal price for current season.",
+    color: "text-primary"
   },
   {
     icon: Users,
     title: "Active Buyers",
     value: "2,847",
-    description: "Number of potential buyers currently seeking produce.",
+    description: "Buyers seeking produce now.",
+    color: "text-secondary"
   },
 ];
 
 const AIInsights = () => {
   return (
-    <section id="ai-insights" className="py-20 md:py-28 bg-background relative overflow-hidden">
-      {/* Background Decorations */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+    <section id="ai-insights" className="py-24 md:py-32 bg-white relative overflow-hidden">
+      {/* Premium Background Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
 
-      <div className="container mx-auto relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Left Column - Content */}
-          <div>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-semibold mb-4">
-              <Bot className="w-4 h-4" />
-              AI-Powered
-            </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-6">
-              Smart Insights,
-              <span className="text-primary"> Better Decisions</span>
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Our AI analyzes market trends, seasonal patterns, and historical data to provide
-              actionable insights. You stay in control — the AI advises, you decide.
-            </p>
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+          
+          {/* Left Column - Sophisticated Content */}
+          <div className="lg:col-span-5 space-y-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+                <Sparkles className="w-3.5 h-3.5" />
+                Next-Gen Intelligence
+              </span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black text-foreground tracking-tight leading-[1.1]">
+                Smart Insights,<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-600">
+                  Better Decisions.
+                </span>
+              </h2>
+            </motion.div>
 
-            <div className="bg-muted/50 rounded-2xl p-6 border border-border/50 mb-8">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-6 h-6 text-accent" />
+            <motion.p 
+              className="text-lg text-muted-foreground leading-relaxed font-medium"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              Our AI ecosystem analyzes millions of transaction signals and seasonal cycles 
+              to provide you with a competitive edge. Transparency meets technology.
+            </motion.p>
+
+            <motion.div 
+              className="p-1 bg-gradient-to-r from-border/50 to-transparent rounded-[2rem]"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="bg-white rounded-[1.9rem] p-8 shadow-sm border border-border/20 flex items-start gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-7 h-7 text-accent" />
                 </div>
                 <div>
-                  <p className="text-foreground font-medium mb-1">How it works:</p>
-                  <p className="text-muted-foreground text-sm">
-                    The AI module is advisory only — farmers retain full control over their
-                    pricing decisions. As more data is collected, predictions become more accurate.
+                  <h4 className="font-bold text-foreground mb-2">Advisory Intelligence</h4>
+                  <p className="text-muted-foreground text-sm leading-relaxed font-medium">
+                    Farmers retain 100% control. The AI module provides high-probability 
+                    recommendations based on live market liquidity.
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <Link to="/ai-insights">
-              <Button size="lg" className="shadow-soft">
-                Explore AI Features
-              </Button>
-            </Link>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Link to="/ai-insights">
+                <Button size="lg" className="h-14 px-8 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-xl shadow-primary/20 group">
+                  Explore Full Analytics
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </motion.div>
           </div>
 
-          {/* Right Column - Structured Insights */}
-          <div className="space-y-8">
-            {/* Key Metrics Section */}
-            <div>
-              <h3 className="text-2xl font-display font-bold text-foreground mb-4">Key Metrics</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {keyMetrics.map((metric, index) => (
-                  <div
-                    key={index}
-                    className="bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated z-10 flex items-center gap-3"
+          {/* Right Column - Premium Visual Data */}
+          <div className="lg:col-span-7 space-y-10">
+            
+            {/* Key Metrics Grid */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              {keyMetrics.map((metric, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ y: -5 }}
+                  className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-premium border border-white/50 ring-1 ring-black/5 flex flex-col items-center text-center group"
+                >
+                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center mb-6 transition-all duration-500 group-hover:rotate-12
+                    ${index === 0 ? 'bg-primary/10' : 'bg-secondary/10'}`}
                   >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                      ${metric.icon === DollarSign ? 'bg-primary/10' : 'bg-secondary/20'}`}
+                    <metric.icon className={`w-8 h-8
+                      ${index === 0 ? 'text-primary' : 'text-secondary'}`} />
+                  </div>
+                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">{metric.title}</p>
+                  <p className="text-4xl font-display font-black text-foreground mb-2 tracking-tight">{metric.value}</p>
+                  <p className="text-xs text-muted-foreground font-medium">{metric.description}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Detailed Insight Cards */}
+            <div className="grid gap-6">
+              {insights.map((insight, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="group"
+                >
+                  <div className="bg-white rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-500 border border-black/[0.02] flex flex-col md:flex-row md:items-center gap-8 ring-1 ring-black/[0.03]">
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all duration-500 group-hover:bg-primary
+                      ${insight.color === 'primary' ? 'bg-primary/10' : 
+                        insight.color === 'secondary' ? 'bg-secondary/10' : 'bg-accent/10'}`}
                     >
-                      <metric.icon className={`w-6 h-6
-                        ${metric.icon === DollarSign ? 'text-primary' : 'text-secondary'}`} />
+                      <insight.icon className={`w-8 h-8 transition-colors duration-500 group-hover:text-white
+                        ${insight.color === 'primary' ? 'text-primary' : 
+                          insight.color === 'secondary' ? 'text-secondary' : 'text-accent'}`} />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">{metric.title}</p>
-                      <p className="text-lg font-bold text-foreground">{metric.value}</p>
+                    <div className="flex-1 space-y-2">
+                      <h3 className="text-xl font-display font-bold text-foreground">
+                        {insight.title}
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed font-medium">
+                        {insight.description}
+                      </p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Detailed Insights Section */}
-            <div>
-              <h3 className="text-2xl font-display font-bold text-foreground mb-4">Detailed Insights</h3>
-              <div className="space-y-5">
-                {insights.map((insight, index) => (
-                  <div
-                    key={index}
-                    className="bg-card rounded-2xl p-6 shadow-soft border border-border/50 hover:shadow-elevated transition-all duration-300 group"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                        <insight.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-display font-bold text-foreground mb-2">
-                          {insight.title}
-                        </h3>
-                        <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
-                          {insight.description}
-                        </p>
-                        <div className="bg-muted/70 rounded-lg px-4 py-2">
-                          <p className="text-sm font-mono text-foreground">
-                            {insight.sample}
-                          </p>
-                        </div>
-                      </div>
+                    <div className="bg-muted/30 rounded-2xl px-6 py-4 border border-border/50 min-w-[220px]">
+                      <p className="text-xs font-black text-muted-foreground uppercase tracking-wider mb-1">AI Output</p>
+                      <p className="text-sm font-bold text-foreground italic leading-tight">
+                        "{insight.sample}"
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+                </motion.div>
+              ))}
             </div>
           </div>
+
         </div>
       </div>
     </section>
