@@ -7,6 +7,7 @@ import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
 import { useFavorites } from "@/hooks/useFavorites";
 import OrderDialog from "@/components/marketplace/OrderDialog";
 import ChatDialog from "@/components/marketplace/ChatDialog";
+import ListingDetailSheet from "@/components/marketplace/ListingDetailSheet";
 import ProduceCardSkeleton from "@/components/marketplace/ProduceCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -69,6 +70,7 @@ const Marketplace = () => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [chatReceiver, setChatReceiver] = useState<{ id: string; name: string } | null>(null);
 
@@ -76,6 +78,11 @@ const Marketplace = () => {
     category: selectedCategory,
     search: debouncedSearch,
   });
+
+  const handleCardClick = (listing: MarketplaceListing) => {
+    setSelectedListing(listing);
+    setDetailSheetOpen(true);
+  };
 
   // Unique locations from listings
   const locations = useMemo(() => {
@@ -332,6 +339,7 @@ const Marketplace = () => {
                       onOrder={handleOrderClick} 
                       onAddToCart={handleAddToCart}
                       onMessage={handleMessageClick}
+                      onCardClick={() => handleCardClick(listing)}
                       isFavorite={isFavorite(listing.id)}
                       onToggleFavorite={() => toggleFavorite(listing.id)}
                     />
@@ -342,6 +350,17 @@ const Marketplace = () => {
           </div>
         </div>
       </main>
+
+      <ListingDetailSheet 
+        listing={selectedListing}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        onOrder={handleOrderClick}
+        onAddToCart={handleAddToCart}
+        onMessage={handleMessageClick}
+        isFavorite={selectedListing ? isFavorite(selectedListing.id) : false}
+        onToggleFavorite={() => selectedListing && toggleFavorite(selectedListing.id)}
+      />
 
       {/* Mobile Filters Drawer - Placeholder logic */}
       {showMobileFilters && (
