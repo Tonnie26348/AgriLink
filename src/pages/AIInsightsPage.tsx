@@ -1,14 +1,30 @@
 import { useState, useEffect } from "react";
-import { Bot, TrendingUp, Calendar, Target, Loader2, Sparkles, ShieldCheck, ShoppingBag, MessageSquare } from "lucide-react";
+import { 
+  Bot, 
+  TrendingUp, 
+  Calendar, 
+  Target, 
+  Loader2, 
+  Sparkles, 
+  MapPin, 
+  Search, 
+  BarChart3, 
+  Info, 
+  ArrowRight,
+  TrendingDown,
+  Minus
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import DemandHeatmap from "@/components/insights/DemandHeatmap";
-import AIDiagnosisDialog from "@/components/farmer/AIDiagnosisDialog";
-import AIChatDialog from "@/components/marketplace/AIChatDialog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { toast } from "sonner";
 
 interface MarketInsight {
   marketOverview: string;
@@ -30,13 +46,22 @@ interface MarketInsight {
   }>;
 }
 
+interface PriceGuidance {
+  suggestedPriceMin: number;
+  suggestedPriceMax: number;
+  demandLevel: string;
+  reasoning: string;
+  pricePosition: string;
+}
+
 const AIInsightsPage = () => {
   const [insight, setInsight] = useState<MarketInsight | null>(null);
   const [loading, setLoading] = useState(true);
-  const [diagnosisOpen, setDiagnosisOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [checkingPrice, setCheckingPrice] = useState(false);
+  const [specificGuidance, setSpecificGuidance] = useState<PriceGuidance | null>(null);
 
-  const fetchInsights = async () => {
+  const fetchGeneralInsights = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase.functions.invoke("price-insights", {
@@ -47,217 +72,357 @@ const AIInsightsPage = () => {
       setInsight(data.guidance);
     } catch (err) {
       console.error("Error fetching market insights:", err);
+      toast.error("Failed to load market intelligence data.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePriceCheck = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setCheckingPrice(true);
+    setSpecificGuidance(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("price-insights", {
+        body: { 
+          mode: "specific",
+          produceType: query,
+          location: "Kenya" 
+        },
+      });
+
+      if (error) throw error;
+      setSpecificGuidance(data.guidance);
+    } catch (err) {
+      console.error("Price check error:", err);
+      toast.error("AI could not analyze this crop right now.");
+    } finally {
+      setCheckingPrice(false);
+    }
+  };
+
   useEffect(() => {
-    fetchInsights();
+    fetchGeneralInsights();
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans selection:bg-primary/20">
       <Header />
       
-      <main className="pt-24 pb-20">
-        <section className="relative overflow-hidden mb-12">
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 px-4 py-1">
-                <Sparkles className="w-3 h-3 mr-2" />
-                Gemini 1.5 Powered
+      {/* Dynamic Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]" />
+      </div>
+
+      <main className="flex-1 pt-32 pb-20 relative z-10">
+        <div className="container mx-auto px-4 max-w-6xl">
+          
+          {/* World-Class Hero Section */}
+          <div className="text-center mb-16 space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <Badge variant="outline" className="bg-white/50 backdrop-blur-sm border-primary/20 text-primary px-4 py-1.5 rounded-full font-semibold shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 mr-2" />
+                Next-Gen Market Intelligence
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-display font-bold text-foreground mb-6">
-                AgriLink <span className="text-primary">Intelligence</span> Center
-              </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Empowering Kenyan agriculture with real-time AI analytics, 
-                computer vision diagnostics, and smart market forecasting.
-              </p>
-            </div>
+            </motion.div>
+            
+            <motion.h1 
+              className="text-5xl md:text-7xl font-display font-black tracking-tight text-foreground"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              Know the <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-600">Market</span>, <br />
+              Grow your <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-teal-600">Future</span>.
+            </motion.h1>
+            
+            <motion.p 
+              className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Real-time transaction analysis powered by Gemini AI. 
+              Fair pricing and strategic planting for every Kenyan farmer.
+            </motion.p>
 
-            {/* AI Features Grid */}
-            <div className="grid md:grid-cols-3 gap-6 mb-20">
-              <Card className="border-primary/20 shadow-soft hover:shadow-elevated transition-all group">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
-                    <ShieldCheck className="w-6 h-6 text-primary group-hover:text-white" />
+            {/* Premium Price Search Bar */}
+            <motion.div 
+              className="max-w-2xl mx-auto mt-12"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <form onSubmit={handlePriceCheck} className="relative group">
+                <div className="absolute inset-0 bg-primary/10 rounded-[2rem] blur-xl group-hover:bg-primary/20 transition-all duration-500 opacity-0 group-focus-within:opacity-100" />
+                <div className="relative bg-white rounded-3xl p-2 shadow-2xl border border-white/50 flex items-center gap-2 ring-1 ring-black/5">
+                  <div className="pl-6 text-muted-foreground group-focus-within:text-primary transition-colors">
+                    <Search className="w-6 h-6" />
                   </div>
-                  <CardTitle>AI Plant Doctor</CardTitle>
-                  <CardDescription>Instant disease & pest diagnosis via camera</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => setDiagnosisOpen(true)} className="w-full gap-2">
-                    Open Diagnosis <Bot className="w-4 h-4" />
+                  <Input 
+                    placeholder="Search price for Red Onions, Maize, Avocado..." 
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="flex-1 border-none focus-visible:ring-0 text-lg font-medium placeholder:text-muted-foreground/60 h-14 bg-transparent"
+                  />
+                  <Button 
+                    type="submit" 
+                    disabled={checkingPrice} 
+                    className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/20"
+                  >
+                    {checkingPrice ? <Loader2 className="w-5 h-5 animate-spin" /> : "Check Price"}
                   </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-secondary/20 shadow-soft hover:shadow-elevated transition-all group">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:bg-secondary transition-colors">
-                    <MessageSquare className="w-6 h-6 text-secondary group-hover:text-white" />
-                  </div>
-                  <CardTitle>AI Assistant</CardTitle>
-                  <CardDescription>Ask about market trends, prices, or tips</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => setChatOpen(true)} variant="secondary" className="w-full gap-2">
-                    Chat with AI <Sparkles className="w-4 h-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-accent/20 shadow-soft hover:shadow-elevated transition-all group">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent transition-colors">
-                    <TrendingUp className="w-6 h-6 text-accent group-hover:text-white" />
-                  </div>
-                  <CardTitle>Price Forecast</CardTitle>
-                  <CardDescription>Predicted market values for next 4 months</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full gap-2" asChild>
-                    <a href="#market-analysis">View Trends <Calendar className="w-4 h-4" /></a>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div id="market-analysis" className="flex flex-col lg:flex-row gap-12 items-start">
-              {/* Left Column - Market Overview */}
-              <div className="lg:w-1/2 w-full space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <ShoppingBag className="w-6 h-6 text-primary" />
-                  </div>
-                  <h2 className="text-3xl font-display font-bold">Market Intelligence</h2>
                 </div>
+              </form>
+            </motion.div>
+          </div>
 
-                {loading ? (
-                  <div className="flex flex-col items-center justify-center p-12 bg-card rounded-3xl border border-dashed border-primary/20">
-                    <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-                    <p className="text-muted-foreground animate-pulse">Analyzing live marketplace data...</p>
-                  </div>
-                ) : insight ? (
-                  <div className="space-y-6">
-                    <Card className="bg-primary/5 border-primary/10 shadow-soft overflow-hidden">
-                      <CardContent className="pt-6">
-                        <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                            <Sparkles className="w-5 h-5 text-primary" />
+          {/* Interactive Results Area */}
+          <AnimatePresence mode="wait">
+            {specificGuidance && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="mb-16"
+              >
+                <Card className="rounded-[2.5rem] overflow-hidden border-none shadow-premium bg-white/80 backdrop-blur-xl ring-1 ring-black/5">
+                  <CardContent className="p-0">
+                    <div className="grid md:grid-cols-12">
+                      <div className="md:col-span-5 bg-gradient-to-br from-primary to-emerald-700 p-12 text-white flex flex-col justify-center text-center md:text-left">
+                        <Badge className="bg-white/20 text-white w-fit mb-6 mx-auto md:mx-0">Live Analysis</Badge>
+                        <h3 className="text-3xl font-display font-bold mb-2 capitalize">{query}</h3>
+                        <div className="text-5xl font-black mb-6">
+                          Ksh {specificGuidance.suggestedPriceMin} - {specificGuidance.suggestedPriceMax}
+                        </div>
+                        <div className="flex items-center gap-3 justify-center md:justify-start">
+                          <div className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md flex items-center gap-2">
+                            <Target className="w-4 h-4" />
+                            <span className="text-sm font-bold">Demand: {specificGuidance.demandLevel}</span>
                           </div>
+                        </div>
+                      </div>
+                      <div className="md:col-span-7 p-12 space-y-6">
+                        <div className="flex items-center gap-3 text-primary">
+                          <Bot className="w-6 h-6" />
+                          <h4 className="font-bold text-xl uppercase tracking-tight">AI Reasoning</h4>
+                        </div>
+                        <p className="text-lg text-muted-foreground leading-relaxed italic">
+                          "{specificGuidance.reasoning}"
+                        </p>
+                        <div className="pt-6 border-t border-muted flex items-center justify-between">
+                          <span className="text-sm font-bold text-muted-foreground uppercase">Price Position</span>
+                          <Badge variant="secondary" className="px-4 py-1.5 rounded-lg capitalize font-bold text-primary">
+                            {specificGuidance.pricePosition} Average
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Core Analytics Tabs */}
+          <Tabs defaultValue="trends" className="w-full space-y-12">
+            <div className="flex justify-center">
+              <TabsList className="bg-white p-1 rounded-2xl shadow-lg border border-white/50 ring-1 ring-black/5 h-14 w-full md:w-fit">
+                <TabsTrigger value="trends" className="rounded-xl px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Market Trends
+                </TabsTrigger>
+                <TabsTrigger value="heatmap" className="rounded-xl px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Demand Map
+                </TabsTrigger>
+                <TabsTrigger value="planting" className="rounded-xl px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+                  <Target className="w-4 h-4 mr-2" />
+                  Planting Strategy
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="trends" className="mt-0 focus-visible:outline-none">
+              <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="grid lg:grid-cols-12 gap-8"
+              >
+                {/* Market Overview */}
+                <div className="lg:col-span-7 space-y-8">
+                  <motion.div variants={itemVariants}>
+                    <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden group h-full">
+                      <CardHeader className="pb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary transition-colors duration-500">
+                          <Bot className="w-6 h-6 text-primary group-hover:text-white" />
+                        </div>
+                        <CardTitle className="text-2xl font-display font-bold">General Overview</CardTitle>
+                        <CardDescription>Synthesized from 15,000+ platform data points</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {loading ? (
+                          <div className="space-y-4">
+                            <div className="h-4 bg-muted animate-pulse rounded w-full" />
+                            <div className="h-4 bg-muted animate-pulse rounded w-[90%]" />
+                            <div className="h-4 bg-muted animate-pulse rounded w-[95%]" />
+                          </div>
+                        ) : (
+                          <p className="text-lg text-muted-foreground leading-relaxed">
+                            {insight?.marketOverview}
+                          </p>
+                        )}
+                        <div className="mt-8 p-6 rounded-2xl bg-secondary/5 border border-secondary/10 flex items-start gap-4">
+                          <Calendar className="w-6 h-6 text-secondary shrink-0 mt-1" />
                           <div>
-                            <h3 className="font-bold text-lg mb-1">Current Overview</h3>
-                            <p className="text-muted-foreground leading-relaxed">{insight.marketOverview}</p>
+                            <h5 className="font-bold text-secondary text-sm uppercase mb-1">Seasonal Advice</h5>
+                            <p className="text-sm text-muted-foreground italic">"{insight?.seasonalAdvice}"</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-
-                    <div className="bg-card rounded-3xl p-6 border border-border/50 shadow-soft">
-                      <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
-                        <MapPin className="w-5 h-5 text-secondary" />
-                        Regional Demand Signals
-                      </h3>
-                      <DemandHeatmap data={insight.demandHeatmap} />
-                    </div>
-
-                    {insight.recommendations && (
-                      <div className="pt-8">
-                        <h3 className="text-2xl font-display font-bold text-foreground mb-6 flex items-center gap-2">
-                          <Target className="text-primary w-6 h-6" />
-                          Recommended for Planting
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {insight.recommendations.map((rec, i) => (
-                            <Card key={i} className="border-primary/20 bg-background hover:border-primary/40 transition-all group overflow-hidden shadow-sm">
-                              <CardContent className="pt-6">
-                                <Badge variant="outline" className="mb-3 bg-primary/10 border-primary/20 text-primary">
-                                  {rec.timeToHarvest} harvest
-                                </Badge>
-                                <h4 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors">{rec.name}</h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{rec.reason}</p>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : null}
-              </div>
-
-              {/* Right Column - Top Performers */}
-              <div className="lg:w-1/2 w-full space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-secondary/10">
-                    <TrendingUp className="w-6 h-6 text-secondary" />
-                  </div>
-                  <h2 className="text-3xl font-display font-bold">Top Performing Crops</h2>
+                  </motion.div>
                 </div>
-                
-                <div className="space-y-4">
-                  {loading ? (
-                     Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="h-24 w-full bg-muted animate-pulse rounded-2xl" />
-                     ))
-                  ) : insight?.topPerformers.map((crop, index) => (
-                    <div
-                      key={index}
-                      className="bg-card rounded-2xl p-6 shadow-soft border border-border/50 hover:shadow-elevated transition-all duration-300 group"
-                    >
-                      <div className="flex items-center justify-between">
+
+                {/* Top Performers */}
+                <div className="lg:col-span-5 space-y-6">
+                  <h3 className="text-xl font-display font-bold px-2 flex items-center justify-between">
+                    Market Leaders
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">This Month</span>
+                  </h3>
+                  <div className="space-y-4">
+                    {loading ? (
+                      [1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-white rounded-3xl animate-pulse shadow-sm" />)
+                    ) : insight?.topPerformers.map((crop, idx) => (
+                      <motion.div
+                        key={idx}
+                        variants={itemVariants}
+                        className="bg-white p-5 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-black/[0.03] flex items-center justify-between group"
+                      >
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary transition-colors">
-                            <span className="text-xl group-hover:scale-110 transition-transform">
-                              {index === 0 ? "🏆" : "📦"}
-                            </span>
+                          <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] flex items-center justify-center text-xl font-black text-muted-foreground group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                            {idx + 1}
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold text-foreground">{crop.name}</h3>
-                            <Badge variant="outline" className={
-                              crop.trend === 'Rising' ? 'text-green-600 border-green-200 bg-green-50' :
-                              crop.trend === 'Falling' ? 'text-red-600 border-red-200 bg-red-50' :
-                              'text-blue-600 border-blue-200 bg-blue-50'
-                            }>
-                              {crop.trend} Trend
-                            </Badge>
+                            <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">{crop.name}</h4>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {crop.trend === 'Rising' ? <TrendingUp className="w-3 h-3 text-green-500" /> : 
+                               crop.trend === 'Falling' ? <TrendingDown className="w-3 h-3 text-red-500" /> : 
+                               <Minus className="w-3 h-3 text-blue-500" />}
+                              <span className={`text-[10px] font-bold uppercase ${
+                                crop.trend === 'Rising' ? 'text-green-600' : 
+                                crop.trend === 'Falling' ? 'text-red-600' : 
+                                'text-blue-600'
+                              }`}>{crop.trend}</span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Value Range</p>
-                          <p className="text-xl font-display font-bold text-primary">{crop.priceRange}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Avg Range</p>
+                          <p className="font-display font-black text-primary">{crop.priceRange}</p>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
+              </motion.div>
+            </TabsContent>
 
-                <Card className="bg-muted/30 border-dashed border-border/50">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-3">
-                      <Bot className="w-5 h-5 text-muted-foreground mt-0.5" />
-                      <p className="text-xs text-muted-foreground italic leading-relaxed">
-                        "AgriLink AI model 1.5-flash uses multi-modal processing to combine 
-                        satellite data imagery with local market signals. This data is updated 
-                        hourly based on transaction volume and listing changes."
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+            <TabsContent value="heatmap" className="mt-0 focus-visible:outline-none animate-in fade-in zoom-in-95 duration-500">
+              <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-8 opacity-5">
+                  <MapPin className="w-32 h-32 text-primary" />
+                </div>
+                <div className="mb-12">
+                  <h3 className="text-3xl font-display font-bold mb-2">Regional Demand Heatmap</h3>
+                  <p className="text-muted-foreground">High concentration areas for specific agricultural demand signals.</p>
+                </div>
+                {loading ? (
+                  <div className="h-[400px] flex items-center justify-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-primary opacity-20" />
+                  </div>
+                ) : (
+                  <div className="min-h-[400px]">
+                    <DemandHeatmap data={insight?.demandHeatmap || []} />
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="planting" className="mt-0 focus-visible:outline-none animate-in slide-in-from-bottom-8 duration-500">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {loading ? (
+                  [1, 2, 3].map(i => <div key={i} className="h-64 bg-white rounded-[2.5rem] animate-pulse shadow-sm" />)
+                ) : insight?.recommendations.map((rec, i) => (
+                  <motion.div
+                    key={i}
+                    whileHover={{ y: -10 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Card className="rounded-[2.5rem] border-none shadow-lg bg-white overflow-hidden h-full flex flex-col group ring-1 ring-black/[0.03]">
+                      <div className="h-3 bg-gradient-to-r from-primary to-emerald-400" />
+                      <CardContent className="p-8 flex-1 flex flex-col">
+                        <Badge variant="secondary" className="bg-primary/10 text-primary border-none rounded-lg px-3 py-1 w-fit mb-6 font-bold">
+                          {rec.timeToHarvest} to Harvest
+                        </Badge>
+                        <h4 className="text-2xl font-display font-bold mb-4 group-hover:text-primary transition-colors">{rec.name}</h4>
+                        <p className="text-muted-foreground leading-relaxed flex-1 italic">
+                          "{rec.reason}"
+                        </p>
+                        <div className="mt-8 pt-6 border-t border-dashed flex items-center justify-between group-cursor-pointer">
+                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Growth Plan</span>
+                          <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-2 transition-transform duration-300" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
               </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* World-Class Data Badge */}
+          <motion.div 
+            className="mt-32 text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white shadow-soft border border-white/50 ring-1 ring-black/5">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
+              <span className="text-sm font-bold text-foreground">AI Intelligence Stream Active</span>
+              <div className="w-px h-4 bg-muted mx-2" />
+              <span className="text-xs text-muted-foreground">Model: Gemini 1.5 Flash • Refresh: Hourly</span>
             </div>
-          </div>
-        </section>
+          </motion.div>
+
+        </div>
       </main>
 
       <Footer />
-
-      {/* Dialogs */}
-      <AIDiagnosisDialog open={diagnosisOpen} onOpenChange={setDiagnosisOpen} />
-      <AIChatDialog open={chatOpen} onOpenChange={setChatOpen} initialMessage="How can I assist you with AgriLink market data today?" />
     </div>
   );
 };
