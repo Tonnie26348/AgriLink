@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, TrendingUp, Shield } from "lucide-react";
+import { ArrowRight, Users, TrendingUp, Shield, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -10,70 +10,99 @@ const Hero = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center py-24 md:py-36 overflow-hidden pb-32">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 z-0 bg-gradient-hero" />
+    <section className="relative min-h-screen flex items-center justify-center py-24 md:py-36 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/80 to-black/60 z-10" />
+        <img 
+          src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop" 
+          alt="Kenyan Farm Landscape" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Floating Elements */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
 
       {/* Content */}
-      <div className="container mx-auto relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Main Content Block */}
-          <div className="text-primary-foreground">
-            <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-2 mb-6 animate-fade-in">
-              <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-              <span className="text-sm font-medium">
-                Empowering Kenyan Farmers
-              </span>
-            </div>
+      <div className="container mx-auto relative z-10 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-2 mb-8 animate-fade-in shadow-lg">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+            </span>
+            <span className="text-sm font-medium text-white tracking-wide">
+              Revolutionizing Agriculture in Kenya
+            </span>
+          </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-display font-bold leading-tight mb-6 animate-fade-in delay-100 opacity-0">
-              Connect Farm to
-              <span className="block text-secondary">Market Directly</span>
-            </h1>
+          {/* Heading */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold leading-tight mb-8 animate-fade-in delay-100 text-white drop-shadow-sm">
+            Connect Farm to <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-secondary relative">
+              Market Directly
+              <svg className="absolute -bottom-2 left-0 w-full h-3 text-accent opacity-50" viewBox="0 0 100 10" preserveAspectRatio="none">
+                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="2" fill="none" />
+              </svg>
+            </span>
+          </h1>
 
-            <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-xl mx-auto animate-fade-in delay-200 opacity-0">
-              AgriLink bridges farmers and buyers with transparent pricing, 
-              AI-powered insights, and direct trade — eliminating middlemen 
-              and maximizing your profits.
-            </p>
+          {/* Subheading */}
+          <p className="text-lg md:text-xl text-gray-100 mb-10 max-w-2xl mx-auto animate-fade-in delay-200 leading-relaxed font-light">
+            AgriLink eliminates middlemen by bridging farmers and buyers with 
+            <span className="font-semibold text-white"> transparent pricing</span>, 
+            <span className="font-semibold text-white"> AI-powered insights</span>, and 
+            <span className="font-semibold text-white"> secure direct trade</span>.
+          </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in delay-300 opacity-0">
-              <Link to="/signup?role=farmer">
-                <Button variant="hero" size="xl" className="w-full sm:w-auto">
-                  Start Selling
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link to="/marketplace">
-                <Button variant="hero-outline" size="xl" className="w-full sm:w-auto">
-                  Find Produce
-                </Button>
-              </Link>
-            </div>
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-5 justify-center mb-16 animate-fade-in delay-300">
+            <Link to="/signup?role=farmer">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-8 rounded-full bg-accent hover:bg-accent/90 text-primary-foreground font-bold shadow-elevated hover:scale-105 transition-transform duration-200">
+                Start Selling
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <Link to="/marketplace">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg h-14 px-8 rounded-full border-white/30 text-white hover:bg-white/10 hover:text-white backdrop-blur-sm shadow-soft hover:scale-105 transition-transform duration-200">
+                Browse Marketplace
+                <ChevronRight className="w-5 h-5 ml-1 opacity-70" />
+              </Button>
+            </Link>
+          </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fade-in delay-400 opacity-0 max-w-2xl mx-auto">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <stat.icon className="w-6 h-6 text-secondary mb-2 mx-auto" />
-                  <div className="text-2xl md:text-3xl font-bold text-primary-foreground">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-primary-foreground/70">
-                    {stat.label}
-                  </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 animate-fade-in delay-400 max-w-4xl mx-auto">
+            {stats.map((stat, index) => (
+              <div 
+                key={index} 
+                className="bg-white/10 backdrop-blur-md border border-white/10 p-6 rounded-2xl hover:bg-white/15 transition-colors duration-300 group"
+              >
+                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <stat.icon className="w-6 h-6 text-accent" />
                 </div>
-              ))}
-            </div>
+                <div className="text-3xl font-bold text-white mb-1 tracking-tight">
+                  {stat.value}
+                </div>
+                <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Bottom Wave */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto block">
           <path
-            d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
+            d="M0 100L48 85C96 70 192 40 288 35C384 30 480 50 576 60C672 70 768 70 864 60C960 50 1056 30 1152 25C1248 20 1344 30 1392 35L1440 40V100H1392C1344 100 1248 100 1152 100C1056 100 960 100 864 100C768 100 672 100 576 100C480 100 384 100 288 100C192 100 96 100 48 100H0Z"
             className="fill-background"
           />
         </svg>

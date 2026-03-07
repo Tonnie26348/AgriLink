@@ -186,62 +186,92 @@ const FarmerDashboard = () => {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col">
+    <div className="min-h-screen bg-muted/30 flex flex-col font-sans">
       {/* Dedicated Dashboard Header */}
-      <header className="bg-background border-b border-border/50 h-16 sticky top-0 z-40 shadow-sm">
+      <header className="bg-background/80 backdrop-blur-xl border-b border-border/40 h-16 md:h-20 sticky top-0 z-50 transition-all duration-300">
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Leaf className="w-5 h-5 text-primary-foreground" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300">
+              <Leaf className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground fill-current" />
             </div>
-            <span className="text-lg font-display font-bold text-foreground hidden sm:inline-block">
-              Agri<span className="text-primary">Link</span> Farmer
-            </span>
+            <div className="flex flex-col">
+              <span className="text-lg md:text-xl font-display font-bold text-foreground leading-none">
+                Agri<span className="text-primary">Link</span> <span className="text-muted-foreground font-medium">Farmer</span>
+              </span>
+            </div>
           </Link>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border/50">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-medium text-foreground">Live Market</span>
+              <span className="text-xs font-semibold text-primary">Live Market</span>
             </div>
-            <Link to="/profile">
+
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center gap-2 border-l border-border/50 pl-4">
+              <Link to="/profile">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-muted-foreground hover:text-primary rounded-full"
+                >
+                  <UserCircle className="w-5 h-5 mr-2" />
+                  Profile
+                </Button>
+              </Link>
               <Button 
                 variant="ghost" 
-                size="sm" 
-                className="text-muted-foreground hover:text-primary"
+                size="icon"
+                onClick={handleLogout} 
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                title="Log Out"
               >
-                <UserCircle className="w-4 h-4 mr-2" />
-                Profile
+                <LogOut className="w-5 h-5" />
               </Button>
-            </Link>
-            <div className="w-px h-6 bg-border mx-1" />
-            <button 
-              type="button"
-              onClick={handleLogout} 
-              className="flex items-center text-sm font-medium text-muted-foreground hover:text-destructive transition-colors px-2 py-1 rounded-md hover:bg-destructive/5"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Log Out
-            </button>
+            </div>
+
+            {/* Mobile Menu */}
+            <div className="md:hidden flex items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <MoreVertical className="w-5 h-5 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 p-2">
+                  <div className="px-2 py-1.5 mb-2 bg-muted/50 rounded-lg">
+                    <p className="text-xs font-medium text-muted-foreground">Signed in as Farmer</p>
+                  </div>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">
+                      <UserCircle className="w-4 h-4 mr-2" /> Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer">
+                    <LogOut className="w-4 h-4 mr-2" /> Log Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Sub-navigation Tabs */}
-      <div className="bg-background border-b border-border/50 sticky top-16 z-30">
+      {/* Sub-navigation Tabs - Sticky & Scrollable */}
+      <div className="bg-background/95 backdrop-blur-md border-b border-border/50 sticky top-16 md:top-20 z-40 shadow-sm transition-all">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-2">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-3 mask-fade-right">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border ${
                   activeTab === tab.id
-                    ? "bg-primary/10 text-primary shadow-sm"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-primary text-primary-foreground border-primary shadow-md transform scale-105"
+                    : "bg-background text-muted-foreground border-transparent hover:bg-muted hover:text-foreground"
                 }`}
               >
-                <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? "animate-pulse" : ""}`} />
+                <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? "animate-bounce" : ""}`} />
                 {tab.label}
               </button>
             ))}
