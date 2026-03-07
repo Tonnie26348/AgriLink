@@ -33,12 +33,15 @@ const MarketInsightsCard = () => {
         body: { mode: "general" },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Market Insights Error:", error);
+        throw error;
+      }
       if (response && response.guidance) {
         setData(response.guidance);
       }
     } catch (err) {
-      console.error("Error fetching market insights:", err);
+      console.error("Failed to fetch market insights:", err);
     } finally {
       setLoading(false);
     }

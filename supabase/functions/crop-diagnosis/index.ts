@@ -11,7 +11,7 @@ serve(async (req) => {
 
   try {
     const { image_path } = await req.json();
-    if (!image_path) throw new Error("No image_path provided in request");
+    if (!image_path) throw new Error("No image provided");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -19,77 +19,47 @@ serve(async (req) => {
     );
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY_CROP");
-    if (!GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY_CROP is missing");
-      throw new Error("API configuration error: Crop Doctor key missing");
-    }
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY_CROP is missing");
 
-    // 1. Download image
     const { data: imageData, error: downloadError } = await supabaseClient.storage
       .from('crop-diagnoses')
       .download(image_path);
 
-    if (downloadError) {
-       console.error("Storage Download Error:", downloadError.message);
-       throw new Error(`Failed to retrieve image: ${downloadError.message}`);
-    }
+    if (downloadError) throw new Error(`Storage Error: ${downloadError.message}`);
 
-    // 2. Prepare Base64 safely
     const arrayBuffer = await imageData.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    let binary = '';
-    const len = uint8Array.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
-    }
-    const base64Image = btoa(binary);
+    const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-    // 3. Call Gemini with precise prompt
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this agricultural plant image. Identify the crop and any diseases or pests. Return ONLY a JSON object with: { \"crop_type\": \"common name\", \"diagnosis\": \"specific condition or 'Healthy'\", \"confidence\": float 0-1, \"treatment_advice\": \"concise actionable steps\" }" },
+            { text: "Analyze this agricultural plant. Return JSON ONLY: { \"crop_type\": \"...\", \"diagnosis\": \"...\", \"confidence\": 0.9, \"treatment_advice\": \"...\" }" },
             { inline_data: { mime_type: "image/jpeg", data: base64Image } }
           ]
-        }],
-        generationConfig: {
-          response_mime_type: "application/json",
-          temperature: 0.1,
-        }
+        }]
       }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Gemini API Error: ${response.status}`, errorText);
-      throw new Error(`AI Diagnosis Service error (${response.status})`);
-    }
-
     const result = await response.json();
-    if (!result.candidates?.[0]?.content?.parts?.[0]?.text) {
-      console.error("Invalid response from Gemini:", JSON.stringify(result));
-      throw new Error("AI returned empty results for this image.");
-    }
+    if (!response.ok) throw new Error(result.error?.message || "Gemini API Error");
 
-    let diagnosisText = result.candidates[0].content.parts[0].text;
-    diagnosisText = diagnosisText.replace(/```json\n?|\n?```/g, "").trim();
+    let text = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI failed to return JSON diagnosis");
     
-    const diagnosis = JSON.parse(diagnosisText);
+    const diagnosis = JSON.parse(jsonMatch[0]);
 
     return new Response(JSON.stringify({ success: true, diagnosis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-    console.error("Crop Diagnosis Error:", errorMessage);
-    return new Response(JSON.stringify({ 
-      error: errorMessage,
-      details: "Please check if your Gemini API key is valid and image is clear."
-    }), {
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    console.error("Diagnosis Error:", msg);
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
