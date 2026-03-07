@@ -92,8 +92,7 @@ const Marketplace = () => {
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    const timeout = setTimeout(() => setDebouncedSearch(value), 300);
-    return () => clearTimeout(timeout);
+    setDebouncedSearch(value);
   };
 
   const handleLocationToggle = (loc: string) => {
