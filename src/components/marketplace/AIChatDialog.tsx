@@ -63,11 +63,18 @@ const AIChatDialog = ({ open, onOpenChange, initialMessage }: AIChatDialogProps)
       });
 
       if (error) {
-        // Try to parse the error from the response
         let errorMessage = "I'm sorry, I encountered an error. Please try again.";
         try {
-          const body = await error.context.json();
-          if (body && body.error) errorMessage = body.error;
+          // Some errors come back as objects with a message
+          if (typeof error === 'object' && 'message' in error) {
+            errorMessage = (error as any).message;
+          }
+          
+          // Try to see if there's a more specific error in the response context
+          if (error.context && typeof error.context.json === 'function') {
+            const body = await error.context.json();
+            if (body && body.error) errorMessage = body.error;
+          }
         } catch (e) {
           console.error("Could not parse error body", e);
         }
