@@ -232,6 +232,14 @@ export const PriceInsights = ({
             <span className="font-bold text-foreground">Insight:</span> {guidance.reasoning}
           </p>
         </div>
+
+        <Button 
+          variant="outline" 
+          onClick={() => setGuidance(null)}
+          className="w-full rounded-xl border-dashed border-border/60 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all text-xs font-bold gap-2"
+        >
+          Choose Another Item
+        </Button>
         
         <p className="text-[10px] text-muted-foreground/60 text-center italic">AI analysis based on county-level market data and seasonal trends.</p>
       </CardContent>
