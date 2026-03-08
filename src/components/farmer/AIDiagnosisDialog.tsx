@@ -62,61 +62,17 @@ const AIDiagnosisDialog = ({
       if (uploadError) throw uploadError;
 
       // 2. Call Edge Function for Analysis
-      console.log("Invoke: Calling crop-diagnosis with path:", filePath);
-      
-      const invokePromise = supabase.functions.invoke('crop-diagnosis', {
+      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('crop-diagnosis', {
         body: { image_path: filePath },
       });
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("The AI service is taking too long to respond. Please try again later.")), 30000)
-      );
-
-      // Define local interfaces for type safety
-      interface AIResponse {
-        success: boolean;
-        diagnosis?: DiagnosisResult;
-        error?: string;
-      }
-
-      const { data: analysisData, error: analysisError } = (await Promise.race([invokePromise, timeoutPromise])) as { data: AIResponse | null, error: Error | null };
-
       if (analysisError) {
-        let detailedMsg = analysisError.message;
-        
-        // Define a local interface for the Supabase Function error structure
-        interface FunctionsHttpError extends Error {
-          context?: { json: () => Promise<{ error?: string }> };
-          status?: number;
-        }
-
-        // Attempt to extract the JSON error body from the non-2xx response
-        const httpError = analysisError as FunctionsHttpError;
-        if (httpError.context && typeof httpError.context.json === 'function') {
-          try {
-            const errorBody = await httpError.context.json();
-            if (errorBody && errorBody.error) detailedMsg = errorBody.error;
-          } catch (e) {
-            console.error("Failed to parse context JSON:", e);
-          }
-        }
-
-        console.error("Invoke Error Details:", {
-          message: detailedMsg,
-          original: analysisError,
-          status: httpError.status
-        });
-        
-        throw new Error(`AI Connection Failed: ${detailedMsg}`);
+        console.error("Function Invocation Failed:", analysisError);
+        throw new Error("Could not connect to AI Service. Please ensure the function is deployed.");
       }
 
-      console.log("Invoke Result:", analysisData);
-
-      // Check for custom logic error returned with status 200
       if (!analysisData || analysisData.success === false) {
-        const errorMsg = analysisData?.error || "The AI Service returned an empty or failed result.";
-        console.error("AI Logic Error:", errorMsg);
-        throw new Error(errorMsg);
+        throw new Error(analysisData?.error || "AI Service failed to analyze the image.");
       }
 
       const diagnosisResult = analysisData.diagnosis;
