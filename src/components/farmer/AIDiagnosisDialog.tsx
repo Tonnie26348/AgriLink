@@ -67,27 +67,18 @@ const AIDiagnosisDialog = ({
       });
 
       if (analysisError) {
-        console.error("Full Edge Function Error Object:", analysisError);
-        let errorMessage = analysisError.message;
-        
-        // Detailed extraction for Supabase FunctionsHttpError
-        if (analysisError instanceof Error && 'context' in analysisError) {
-          try {
-            const context = (analysisError as { context?: { json: () => Promise<{ error?: string }> } }).context;
-            if (context && typeof context.json === 'function') {
-              const body = await context.json();
-              console.log("Error body from function:", body);
-              if (body && body.error) errorMessage = body.error;
-            }
-          } catch (e) {
-            console.error("Failed to parse error body:", e);
-          }
-        }
-        
-        throw new Error(errorMessage || "AI Service Error (Check console for details)");
+        console.error("HTTP Error from Edge Function:", analysisError);
+        throw new Error(`Connection Error: ${analysisError.message}. Please check if the function is deployed.`);
+      }
+
+      // Check for custom logic error returned with status 200
+      if (!analysisData.success) {
+        console.error("Logic Error from AI Service:", analysisData.error);
+        throw new Error(analysisData.error || "The AI Service encountered a problem.");
       }
 
       const diagnosisResult = analysisData.diagnosis;
+      setResult(diagnosisResult);
       setResult(diagnosisResult);
 
       // 3. Save diagnosis to DB

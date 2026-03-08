@@ -56,11 +56,27 @@ serve(async (req) => {
     });
 
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error?.message || "Gemini API Error");
+    if (!response.ok) {
+      console.error("Gemini API Error Response:", result);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: `Gemini AI Error: ${result.error?.message || "Unknown API Error"}` 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI failed to return JSON diagnosis");
+    
+    if (!jsonMatch) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: "AI failed to format the diagnosis correctly. Please try again." 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     const diagnosis = JSON.parse(jsonMatch[0]);
 
@@ -70,9 +86,12 @@ serve(async (req) => {
 
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Unknown error";
-    console.error("Diagnosis Error:", msg);
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 500,
+    console.error("Diagnosis Function Crash:", msg);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: `Service Crash: ${msg}` 
+    }), {
+      status: 200, // Return 200 so the frontend can read the JSON error
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
