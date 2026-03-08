@@ -60,17 +60,15 @@ export const useProfile = () => {
 
     try {
       setLoading(true);
+      console.log("Updating profile with:", updates);
       
-      // Use the RPC for maximum reliability
-      const { error: rpcError } = await supabase.rpc('update_user_profile', {
-        p_full_name: updates.full_name,
-        p_phone: updates.phone,
-        p_location: updates.location,
-        p_avatar_url: updates.avatar_url,
-        p_email_notifications: updates.email_notifications
-      });
+      // Standard table update is better for partial updates (e.g. just avatar_url)
+      const { error } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("user_id", user.id);
 
-      if (rpcError) throw rpcError;
+      if (error) throw error;
 
       // Final step: manually fetch the latest profile data
       await fetchProfile();
