@@ -11,38 +11,26 @@ serve(async (req) => {
 
   try {
     const { image_path } = await req.json();
-    
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
+    const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
     const apiKey = Deno.env.get("GEMINI_API_KEY_CROP") || Deno.env.get("GEMINI_API_KEY");
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing.");
 
-    const { data: imageBlob, error: downloadError } = await supabase.storage
-      .from('crop-diagnoses')
-      .download(image_path);
-
+    const { data: imageBlob, error: downloadError } = await supabase.storage.from('crop-diagnoses').download(image_path);
     if (downloadError) throw new Error(`Storage Error: ${downloadError.message}`);
 
     const buffer = await imageBlob.arrayBuffer();
-    const uint8Array = new Uint8Array(buffer);
-    let binary = "";
-    for (let i = 0; i < uint8Array.byteLength; i++) binary += String.fromCharCode(uint8Array[i]);
-    const base64 = btoa(binary);
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
-    // List of model/version combinations to try in order of preference
+    // Order of preference for models
     const attempts = [
+      { ver: "v1beta", model: "gemini-1.5-flash-latest" },
       { ver: "v1beta", model: "gemini-1.5-flash" },
       { ver: "v1", model: "gemini-1.5-flash" },
-      { ver: "v1beta", model: "gemini-pro-vision" },
-      { ver: "v1beta", model: "gemini-1.5-pro" }
+      { ver: "v1beta", model: "gemini-1.5-pro-latest" }
     ];
 
     let lastError = "";
     for (const attempt of attempts) {
-      console.log(`Attempting analysis with ${attempt.model} (${attempt.ver})...`);
       try {
         const resp = await fetch(`https://generativelanguage.googleapis.com/${attempt.ver}/models/${attempt.model}:generateContent?key=${apiKey}`, {
           method: "POST",
@@ -58,26 +46,27 @@ serve(async (req) => {
         });
 
         const result = await resp.json();
-        
-        if (resp.ok) {
-          const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (resp.ok && result.candidates?.[0]?.content?.parts?.[0]?.text) {
+          const text = result.candidates[0].content.parts[0].text;
           const jsonMatch = text.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
-            console.log(`Success with ${attempt.model}!`);
             return new Response(JSON.stringify({ success: true, diagnosis: JSON.parse(jsonMatch[0]) }), {
               headers: { ...corsHeaders, "Content-Type": "application/json" }
             });
           }
         } else {
-          lastError = result.error?.message || "Unknown API Error";
-          console.warn(`${attempt.model} failed: ${lastError}`);
+          lastError = result.error?.message || "Format error";
         }
-      } catch (e) {
-        console.warn(`Fetch error for ${attempt.model}:`, e.message);
-      }
+      } catch (e) { /* ignore and retry */ }
     }
 
-    throw new Error(`All Gemini models failed. Last error: ${lastError}`);
+    // DIAGNOSTIC FALLBACK: If all failed, let's see what models ARE available for this key
+    console.log("All preferred models failed. Fetching available model list...");
+    const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    const listData = await listResp.json();
+    const available = listData.models?.map((m: { name: string }) => m.name.replace('models/', '')).join(', ') || "none";
+
+    throw new Error(`Model Mismatch. Available models for your key: ${available}. Please ensure 'gemini-1.5-flash' is supported in your region.`);
 
   } catch (err) {
     return new Response(JSON.stringify({ success: false, error: err.message }), {
