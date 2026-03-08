@@ -62,34 +62,31 @@ const AIDiagnosisDialog = ({
       if (uploadError) throw uploadError;
 
       // 2. Call Edge Function for Analysis
+      console.log("Invoke: Calling crop-diagnosis with path:", filePath);
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke('crop-diagnosis', {
         body: { image_path: filePath },
       });
 
       if (analysisError) {
-        console.error("HTTP Error from Edge Function:", analysisError);
-        throw new Error(`Connection Error: ${analysisError.message}. Please check if the function is deployed.`);
+        console.error("Invoke Error Details:", {
+          message: analysisError.message,
+          error: analysisError,
+          status: (analysisError as any).status
+        });
+        throw new Error(`AI Connection Failed: ${analysisError.message}`);
       }
 
+      console.log("Invoke Result:", analysisData);
+
       // Check for custom logic error returned with status 200
-      if (!analysisData.success) {
-        console.error("Logic Error from AI Service:", analysisData.error);
-        throw new Error(analysisData.error || "The AI Service encountered a problem.");
+      if (!analysisData || analysisData.success === false) {
+        const errorMsg = analysisData?.error || "The AI Service returned an empty or failed result.";
+        console.error("AI Logic Error:", errorMsg);
+        throw new Error(errorMsg);
       }
 
       const diagnosisResult = analysisData.diagnosis;
       setResult(diagnosisResult);
-      setResult(diagnosisResult);
-
-      // 3. Save diagnosis to DB
-      const { error: dbError } = await supabase.from('crop_diagnoses').insert({
-        farmer_id: user.id,
-        image_url: supabase.storage.from('crop-diagnoses').getPublicUrl(filePath).data.publicUrl,
-        crop_type: diagnosisResult.crop_type,
-        diagnosis: diagnosisResult.diagnosis,
-        confidence: diagnosisResult.confidence,
-        treatment_advice: diagnosisResult.treatment_advice,
-      });
 
       if (dbError) throw dbError;
 

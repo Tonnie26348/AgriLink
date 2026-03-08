@@ -7,41 +7,40 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { image_path } = await req.json();
-    if (!image_path) throw new Error("No image path provided in request");
+    if (!image_path) throw new Error("No image path provided");
 
+    // Initialize Supabase with Service Role for Storage access
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Get API Key
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY_CROP") || Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing in Supabase project secrets");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing in Supabase secrets");
 
-    console.log(`Downloading image: ${image_path}`);
+    // Download Image
+    console.log(`Processing: ${image_path}`);
     const { data: imageData, error: downloadError } = await supabaseClient.storage
       .from('crop-diagnoses')
       .download(image_path);
 
-    if (downloadError) {
-      console.error("Storage Error:", downloadError);
-      throw new Error(`Storage Error: ${downloadError.message}. Ensure 'crop-diagnoses' bucket exists and is public.`);
-    }
+    if (downloadError) throw new Error(`Storage Error: ${downloadError.message}`);
 
+    // Encode to Base64
     const arrayBuffer = await imageData.arrayBuffer();
     const contentType = imageData.type || "image/jpeg";
-    
     const uint8Array = new Uint8Array(arrayBuffer);
     let binaryString = "";
-    for (let i = 0; i < uint8Array.length; i++) {
-      binaryString += String.fromCharCode(uint8Array[i]);
-    }
+    for (let i = 0; i < uint8Array.length; i++) binaryString += String.fromCharCode(uint8Array[i]);
     const base64Image = btoa(binaryString);
 
-    console.log("Calling Gemini API...");
+    // Call Gemini
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -56,11 +55,11 @@ serve(async (req) => {
     });
 
     const result = await response.json();
+    
     if (!response.ok) {
-      console.error("Gemini API Error Response:", result);
       return new Response(JSON.stringify({ 
         success: false, 
-        error: `Gemini AI Error: ${result.error?.message || "Unknown API Error"}` 
+        error: `Gemini Error: ${result.error?.message || "Unknown AI Error"}` 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -72,7 +71,7 @@ serve(async (req) => {
     if (!jsonMatch) {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: "AI failed to format the diagnosis correctly. Please try again." 
+        error: "AI failed to return a valid diagnosis format. Please try a clearer photo." 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -86,12 +85,8 @@ serve(async (req) => {
 
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Unknown error";
-    console.error("Diagnosis Function Crash:", msg);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: `Service Crash: ${msg}` 
-    }), {
-      status: 200, // Return 200 so the frontend can read the JSON error
+    console.error("Function Crash:", msg);
+    return new Response(JSON.stringify({ success: false, error: msg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
