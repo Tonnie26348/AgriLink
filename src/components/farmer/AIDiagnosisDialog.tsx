@@ -67,19 +67,24 @@ const AIDiagnosisDialog = ({
       });
 
       if (analysisError) {
-        let errorMessage = "AI Service Error";
+        console.error("Full Edge Function Error Object:", analysisError);
+        let errorMessage = analysisError.message;
         
-        // Try to extract the JSON error message from Supabase's non-2xx response
-        try {
-          if (analysisError.context) {
-            const body = await analysisError.context.json();
-            if (body && body.error) errorMessage = body.error;
+        // Detailed extraction for Supabase FunctionsHttpError
+        if (analysisError instanceof Error && 'context' in analysisError) {
+          try {
+            const context = (analysisError as any).context;
+            if (context && typeof context.json === 'function') {
+              const body = await context.json();
+              console.log("Error body from function:", body);
+              if (body && body.error) errorMessage = body.error;
+            }
+          } catch (e) {
+            console.error("Failed to parse error body:", e);
           }
-        } catch (e) {
-          errorMessage = analysisError.message;
         }
         
-        throw new Error(errorMessage);
+        throw new Error(errorMessage || "AI Service Error (Check console for details)");
       }
 
       const diagnosisResult = analysisData.diagnosis;
