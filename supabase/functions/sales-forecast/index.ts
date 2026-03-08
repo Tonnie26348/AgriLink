@@ -17,8 +17,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const geminiKey = Deno.env.get("GEMINI_API_KEY_SALES");
-    if (!geminiKey) throw new Error("GEMINI_API_KEY_SALES is missing");
+    const geminiKey = Deno.env.get("GEMINI_API_KEY_SALES") || Deno.env.get("GEMINI_API_KEY");
+    if (!geminiKey) throw new Error("GEMINI_API_KEY or GEMINI_API_KEY_SALES is missing");
 
     const prompt = `Forecast Kenyan sales for ${cropType || 'Produce'} based on history: ${JSON.stringify(history)}. 
     Current: ${new Date().toLocaleString('en-US', { month: 'long' })}. 

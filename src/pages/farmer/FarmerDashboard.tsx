@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PriceInsights } from "@/components/insights/PriceInsights";
 import AIDiagnosisDialog from "@/components/farmer/AIDiagnosisDialog";
+import { HarvestCalendar } from "@/components/farmer/HarvestCalendar";
 import OnboardingTour from "@/components/OnboardingTour";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { useMemo } from "react";
@@ -578,49 +579,7 @@ const FarmerDashboard = () => {
           )}
 
           {activeTab === "calendar" && (
-            <Card className="shadow-soft border-border/50">
-              <CardHeader className="pb-3 border-b border-border/10">
-                <CardTitle className="text-2xl">Harvest Calendar</CardTitle>
-                <CardDescription>Track upcoming harvests and plan your listings</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-6">
-                  {listings.filter(l => l.harvest_date).length === 0 ? (
-                    <div className="text-center py-12">
-                      <CalendarIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-20" />
-                      <p className="text-muted-foreground">No upcoming harvests scheduled</p>
-                    </div>
-                  ) : (
-                    <div className="grid gap-4">
-                      {listings
-                        .filter(l => l.harvest_date)
-                        .sort((a, b) => new Date(a.harvest_date!).getTime() - new Date(b.harvest_date!).getTime())
-                        .map((listing) => {
-                          const harvestDate = new Date(listing.harvest_date!);
-                          const isUpcoming = harvestDate > new Date();
-                          return (
-                            <div key={listing.id} className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/50">
-                              <div className="flex flex-col items-center justify-center w-16 h-16 rounded-xl bg-background border border-border/50 shadow-sm">
-                                <span className="text-[10px] uppercase font-bold text-primary">{format(harvestDate, "MMM")}</span>
-                                <span className="text-xl font-bold text-foreground">{format(harvestDate, "dd")}</span>
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-bold text-foreground">{listing.name}</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {isUpcoming ? "Scheduled Harvest" : "Harvested"} • {listing.quantity_available} {listing.unit} expected
-                                </p>
-                              </div>
-                              <Badge variant={isUpcoming ? "default" : "secondary"}>
-                                {isUpcoming ? "Upcoming" : "Past"}
-                              </Badge>
-                            </div>
-                          );
-                        })}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <HarvestCalendar listings={listings} />
           )}
 
           {activeTab === "ai-insights" && (

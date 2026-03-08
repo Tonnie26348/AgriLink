@@ -9,6 +9,7 @@ import OrderDialog from "@/components/marketplace/OrderDialog";
 import ChatDialog from "@/components/marketplace/ChatDialog";
 import ListingDetailSheet from "@/components/marketplace/ListingDetailSheet";
 import ProduceCardSkeleton from "@/components/marketplace/ProduceCardSkeleton";
+import { MarketMap } from "@/components/marketplace/MarketMap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -270,6 +271,17 @@ const Marketplace = () => {
                 Search
               </Button>
             </div>
+
+            {/* Market Map Section */}
+            {!loading && listings.length > 0 && (
+              <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                <MarketMap 
+                  listings={listings} 
+                  onLocationSelect={handleLocationToggle}
+                  selectedLocations={selectedLocations}
+                />
+              </div>
+            )}
 
             {/* Active Filter Badges */}
             {(selectedCategory !== "All" || selectedLocations.length > 0) && (

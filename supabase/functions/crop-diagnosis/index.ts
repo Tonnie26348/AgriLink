@@ -18,8 +18,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY_CROP");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY_CROP is missing");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY_CROP") || Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY or GEMINI_API_KEY_CROP is missing");
 
     const { data: imageData, error: downloadError } = await supabaseClient.storage
       .from('crop-diagnoses')
@@ -28,7 +28,14 @@ serve(async (req) => {
     if (downloadError) throw new Error(`Storage Error: ${downloadError.message}`);
 
     const arrayBuffer = await imageData.arrayBuffer();
-    const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    
+    // Robust base64 encoding using a loop to avoid stack overflow
+    const uint8Array = new Uint8Array(arrayBuffer);
+    let binaryString = "";
+    for (let i = 0; i < uint8Array.length; i++) {
+      binaryString += String.fromCharCode(uint8Array[i]);
+    }
+    const base64Image = btoa(binaryString);
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",

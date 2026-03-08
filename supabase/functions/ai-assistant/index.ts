@@ -12,8 +12,8 @@ serve(async (req) => {
     const { prompt, history } = await req.json();
     if (!prompt) throw new Error("No prompt provided");
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY_ASSISTANT");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY_ASSISTANT is missing");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY_ASSISTANT") || Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY or GEMINI_API_KEY_ASSISTANT is missing");
 
     const systemPrompt = "You are the AgriLink Assistant. Help Kenyan users with produce, prices, and farming tips. Be concise and friendly. Use Ksh.";
 
