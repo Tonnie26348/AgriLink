@@ -63,9 +63,16 @@ const AIDiagnosisDialog = ({
 
       // 2. Call Edge Function for Analysis
       console.log("Invoke: Calling crop-diagnosis with path:", filePath);
-      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('crop-diagnosis', {
+      
+      const invokePromise = supabase.functions.invoke('crop-diagnosis', {
         body: { image_path: filePath },
       });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("The AI service is taking too long to respond. Please try again later.")), 30000)
+      );
+
+      const { data: analysisData, error: analysisError } = (await Promise.race([invokePromise, timeoutPromise])) as { data: any, error: any };
 
       if (analysisError) {
         let detailedMsg = analysisError.message;
@@ -107,6 +114,16 @@ const AIDiagnosisDialog = ({
 
       const diagnosisResult = analysisData.diagnosis;
       setResult(diagnosisResult);
+
+      // 3. Save diagnosis to DB
+      const { error: dbError } = await supabase.from('crop_diagnoses').insert({
+        farmer_id: user.id,
+        image_url: supabase.storage.from('crop-diagnoses').getPublicUrl(filePath).data.publicUrl,
+        crop_type: diagnosisResult.crop_type,
+        diagnosis: diagnosisResult.diagnosis,
+        confidence: diagnosisResult.confidence,
+        treatment_advice: diagnosisResult.treatment_advice,
+      });
 
       if (dbError) throw dbError;
 
