@@ -11,7 +11,7 @@ serve(async (req) => {
 
   try {
     const { image_path } = await req.json();
-    if (!image_path) throw new Error("No image provided");
+    if (!image_path) throw new Error("No image path provided in request");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -19,17 +19,21 @@ serve(async (req) => {
     );
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY_CROP") || Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY or GEMINI_API_KEY_CROP is missing");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing in Supabase project secrets");
 
+    console.log(`Downloading image: ${image_path}`);
     const { data: imageData, error: downloadError } = await supabaseClient.storage
       .from('crop-diagnoses')
       .download(image_path);
 
-    if (downloadError) throw new Error(`Storage Error: ${downloadError.message}`);
+    if (downloadError) {
+      console.error("Storage Error:", downloadError);
+      throw new Error(`Storage Error: ${downloadError.message}. Ensure 'crop-diagnoses' bucket exists and is public.`);
+    }
 
     const arrayBuffer = await imageData.arrayBuffer();
+    const contentType = imageData.type || "image/jpeg";
     
-    // Robust base64 encoding using a loop to avoid stack overflow
     const uint8Array = new Uint8Array(arrayBuffer);
     let binaryString = "";
     for (let i = 0; i < uint8Array.length; i++) {
@@ -37,14 +41,15 @@ serve(async (req) => {
     }
     const base64Image = btoa(binaryString);
 
+    console.log("Calling Gemini API...");
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this agricultural plant. Return JSON ONLY: { \"crop_type\": \"...\", \"diagnosis\": \"...\", \"confidence\": 0.9, \"treatment_advice\": \"...\" }" },
-            { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+            { text: "Analyze this agricultural plant image. Identify the crop and any diseases. Return JSON ONLY: { \"crop_type\": \"...\", \"diagnosis\": \"...\", \"confidence\": 0.9, \"treatment_advice\": \"...\" }" },
+            { inline_data: { mime_type: contentType, data: base64Image } }
           ]
         }]
       }),
