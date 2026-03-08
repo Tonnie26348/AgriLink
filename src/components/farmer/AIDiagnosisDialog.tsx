@@ -71,7 +71,7 @@ const AIDiagnosisDialog = ({
         console.error("Invoke Error Details:", {
           message: analysisError.message,
           error: analysisError,
-          status: (analysisError as any).status
+          status: (analysisError as { status?: number }).status
         });
         throw new Error(`AI Connection Failed: ${analysisError.message}`);
       }
