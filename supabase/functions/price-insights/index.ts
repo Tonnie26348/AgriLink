@@ -9,16 +9,26 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { produceType, currentPrice, unit, location } = await req.json();
+    const body = await req.json();
+    const mode = body.mode || "item"; // 'item' or 'general'
+    
     const apiKey = Deno.env.get("GEMINI_API_KEY_MARKET") || Deno.env.get("GEMINI_API_KEY");
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing.");
 
     const models = ["gemini-2.0-flash", "gemini-2.5-flash"];
     let lastError = "";
 
-    const prompt = `You are a Kenyan agricultural market expert. Analyze the price for ${produceType} in ${location}. 
-    Current price: ${currentPrice} per ${unit}. 
-    Return JSON ONLY: { "success": true, "guidance": { "suggestedPriceMin": 0, "suggestedPriceMax": 0, "demandLevel": "High/Medium/Low", "reasoning": "...", "pricePosition": "within/above/below" } }`;
+    let prompt = "";
+    if (mode === "general") {
+      prompt = `You are a Kenyan agricultural market expert. Provide a general overview of the current market. 
+      Focus on items like Tomatoes, Sukuma Wiki, Maize, and Onions.
+      Return JSON ONLY in this format: { "success": true, "guidance": { "marketOverview": "...", "topPerformers": [{"name": "...", "trend": "Rising/Stable/Falling", "priceRange": "Ksh 0 - 0"}], "seasonalAdvice": "...", "recommendations": [{"name": "...", "reason": "...", "timeToHarvest": "..."}] } }`;
+    } else {
+      const { produceType, currentPrice, unit, location } = body;
+      prompt = `You are a Kenyan agricultural market expert. Analyze the price for ${produceType} in ${location || 'Kenya'}. 
+      Current price: ${currentPrice} per ${unit}. 
+      Return JSON ONLY: { "success": true, "guidance": { "suggestedPriceMin": 0, "suggestedPriceMax": 0, "demandLevel": "High/Medium/Low", "reasoning": "...", "pricePosition": "within/above/below" } }`;
+    }
 
     for (const model of models) {
       try {

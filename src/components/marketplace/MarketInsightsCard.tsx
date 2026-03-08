@@ -29,14 +29,34 @@ const MarketInsightsCard = () => {
   const fetchInsights = async () => {
     setLoading(true);
     try {
-      const { data: response, error } = await supabase.functions.invoke("price-insights", {
+      const invokePromise = supabase.functions.invoke("price-insights", {
         body: { mode: "general" },
       });
 
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("AI Analyst is taking too long. Please try again.")), 30000)
+      );
+
+      interface InsightData {
+        marketOverview: string;
+        topPerformers: MarketTrend[];
+        seasonalAdvice: string;
+        recommendations?: CropRecommendation[];
+      }
+
+      const { data: response, error } = (await Promise.race([invokePromise, timeoutPromise])) as {
+        data: { success: boolean; guidance: InsightData; error?: string } | null;
+        error: Error | null;
+      };
+
       if (error) {
-        console.error("Market Insights Error:", error);
         throw error;
       }
+      
+      if (!response || response.success === false) {
+        throw new Error(response?.error || "AI Service failure");
+      }
+
       if (response && response.guidance) {
         setData(response.guidance);
       }
