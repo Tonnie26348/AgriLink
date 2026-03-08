@@ -58,56 +58,13 @@ export const PriceInsights = ({
 
   const { toast } = useToast();
 
-  const fetchAIInsights = async (): Promise<PriceGuidance | null> => {
-    try {
-      // Prepare prediction request
-      const response = await fetch(`${AI_SERVICE_URL}/predict-price`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          crop_type: selected.name,
-          location: location,
-          historical_prices: [selected.price_per_unit * 0.95, selected.price_per_unit, selected.price_per_unit * 1.05],
-          seasonal_factor: 0.5,
-          demand_level: "Medium",
-          supply_level: "Medium"
-        })
-      });
-
-      if (!response.ok) throw new Error("FastAPI service unavailable");
-
-      const data: PricePredictionResponse = await response.json();
-      
-      const price = selected.price_per_unit;
-      const [min, max] = data.confidence_interval;
-      const position = price < min ? "below" : price > max ? "above" : "within";
-
-      return {
-        suggestedPriceMin: min,
-        suggestedPriceMax: max,
-        demandLevel: "Medium",
-        reasoning: data.recommendation,
-        pricePosition: position
-      };
-    } catch (err) {
-      console.warn("FastAPI prediction failed, falling back to Gemini/Simulation");
-      return null;
-    }
-  };
-
   const fetchGuidance = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // 1. Try FastAPI specialized model first
-      const fastApiData = await fetchAIInsights();
-      if (fastApiData) {
-        setGuidance(fastApiData);
-        return;
-      }
-
-      // 2. Try Live AI from Supabase Edge Function (Gemini)
+      // Use Live AI from Supabase Edge Function (Gemini 2.0/2.5)
+      // This is secure and won't trigger browser "local device" prompts
       const { data, error: functionError } = await supabase.functions.invoke('price-insights', {
         body: { 
           produceType: selected.name, 
@@ -117,13 +74,15 @@ export const PriceInsights = ({
         }
       });
 
+      if (functionError) throw functionError;
+
       if (data?.success) {
         setGuidance(data.guidance);
         return;
       }
 
-      // 3. Fallback to Simulated Logic
-      console.warn("Advanced AI failed, using local simulation logic");
+      // Fallback to local simulation if the service is down
+      console.warn("AI Service returned unsuccessful, using simulation fallback");
       
       await new Promise(resolve => setTimeout(resolve, 1000));
       const price = selected.price_per_unit;
