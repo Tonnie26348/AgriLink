@@ -21,12 +21,11 @@ serve(async (req) => {
     const buffer = await imageBlob.arrayBuffer();
     const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
-    // Order of preference for models
+    // Use the specific models your key supports (Gemini 2.0/2.5)
     const attempts = [
-      { ver: "v1beta", model: "gemini-1.5-flash-latest" },
-      { ver: "v1beta", model: "gemini-1.5-flash" },
-      { ver: "v1", model: "gemini-1.5-flash" },
-      { ver: "v1beta", model: "gemini-1.5-pro-latest" }
+      { ver: "v1beta", model: "gemini-2.0-flash" },
+      { ver: "v1beta", model: "gemini-2.5-flash" },
+      { ver: "v1beta", model: "gemini-flash-latest" }
     ];
 
     let lastError = "";
@@ -57,16 +56,10 @@ serve(async (req) => {
         } else {
           lastError = result.error?.message || "Format error";
         }
-      } catch (e) { /* ignore and retry */ }
+      } catch (e) { lastError = e.message; }
     }
 
-    // DIAGNOSTIC FALLBACK: If all failed, let's see what models ARE available for this key
-    console.log("All preferred models failed. Fetching available model list...");
-    const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    const listData = await listResp.json();
-    const available = listData.models?.map((m: { name: string }) => m.name.replace('models/', '')).join(', ') || "none";
-
-    throw new Error(`Model Mismatch. Available models for your key: ${available}. Please ensure 'gemini-1.5-flash' is supported in your region.`);
+    throw new Error(`AI Model Error: ${lastError}`);
 
   } catch (err) {
     return new Response(JSON.stringify({ success: false, error: err.message }), {
