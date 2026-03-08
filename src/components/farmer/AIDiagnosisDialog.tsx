@@ -67,9 +67,26 @@ const AIDiagnosisDialog = ({
       });
 
       if (analysisError) {
-        console.error("Invoke Failed:", analysisError);
-        // Display the actual error message from Supabase (e.g. 404 or 500)
-        throw new Error(`Cloud Error: ${analysisError.message || "Unknown Status"}`);
+        console.error("Invoke Failed with details:", analysisError);
+        
+        let statusText = "";
+        
+        // Proper interface for Supabase Function error
+        interface FunctionsHttpError extends Error {
+          context?: Response;
+        }
+
+        const httpError = analysisError as FunctionsHttpError;
+        if (httpError.context) {
+          try {
+            const resp = httpError.context;
+            statusText = ` (Status: ${resp.status} ${resp.statusText})`;
+          } catch (e) {
+            console.error("Could not extract status from context", e);
+          }
+        }
+
+        throw new Error(`Cloud Connection Failed${statusText}: ${analysisError.message}`);
       }
 
       if (!analysisData || analysisData.success === false) {
