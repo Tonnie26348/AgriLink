@@ -21,6 +21,7 @@ const Hero = () => {
           src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop" 
           alt="Kenyan Farm Landscape" 
           className="w-full h-full object-cover"
+          fetchPriority="high"
         />
       </div>
 

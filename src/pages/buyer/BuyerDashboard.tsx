@@ -32,6 +32,7 @@ import {
 
 import MarketInsightsCard from "@/components/marketplace/MarketInsightsCard";
 import AIAssistantCard from "@/components/marketplace/AIAssistantCard";
+import { MarketTrends } from "@/components/marketplace/MarketTrends";
 import OnboardingTour from "@/components/OnboardingTour";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -176,6 +177,7 @@ const BuyerDashboard = ({ activeTab: propActiveTab = "overview" }: BuyerDashboar
 
                 <div className="space-y-6">
                   <AIAssistantCard />
+                  <MarketTrends />
                   <MarketInsightsCard />
                   
                   <Card className="shadow-soft border-border/50">

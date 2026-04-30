@@ -63,8 +63,38 @@ export const PriceInsights = ({
     setError(null);
     
     try {
-      // Use Live AI from Supabase Edge Function (Gemini 2.0/2.5)
-      // This is secure and won't trigger browser "local device" prompts
+      // 1. Try Local FastAPI AI Service first
+      try {
+        const localResponse = await fetch(`${AI_SERVICE_URL}/predict-price`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            crop_type: selected.name,
+            location: location,
+            historical_prices: [selected.price_per_unit * 0.95, selected.price_per_unit * 0.98, selected.price_per_unit],
+            seasonal_factor: 1.0,
+            demand_level: "Medium",
+            supply_level: "Medium"
+          })
+        });
+
+        if (localResponse.ok) {
+          const data: PricePredictionResponse = await localResponse.json();
+          setGuidance({
+            suggestedPriceMin: data.confidence_interval[0],
+            suggestedPriceMax: data.confidence_interval[1],
+            demandLevel: "Medium", // FastAPI doesn't return this yet, so we default
+            reasoning: data.recommendation,
+            pricePosition: selected.price_per_unit < data.confidence_interval[0] ? "below" : 
+                           selected.price_per_unit > data.confidence_interval[1] ? "above" : "within"
+          });
+          return;
+        }
+      } catch (e) {
+        console.log("Local AI service not available, falling back to Supabase Edge Function");
+      }
+
+      // 2. Fallback to Supabase Edge Function (Gemini)
       const { data, error: functionError } = await supabase.functions.invoke('price-insights', {
         body: { 
           produceType: selected.name, 
@@ -74,15 +104,13 @@ export const PriceInsights = ({
         }
       });
 
-      if (functionError) throw functionError;
-
-      if (data?.success) {
+      if (!functionError && data?.success) {
         setGuidance(data.guidance);
         return;
       }
 
-      // Fallback to local simulation if the service is down
-      console.warn("AI Service returned unsuccessful, using simulation fallback");
+      // 3. Last Resort: Simulation Fallback
+      console.warn("All AI Services failed, using simulation fallback");
       
       await new Promise(resolve => setTimeout(resolve, 1000));
       const price = selected.price_per_unit;

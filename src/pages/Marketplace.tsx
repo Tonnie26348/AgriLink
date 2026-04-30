@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context-definition";
@@ -7,9 +7,8 @@ import { useMarketplace, MarketplaceListing } from "@/hooks/useMarketplace";
 import { useFavorites } from "@/hooks/useFavorites";
 import OrderDialog from "@/components/marketplace/OrderDialog";
 import ChatDialog from "@/components/marketplace/ChatDialog";
-import ListingDetailSheet from "@/components/marketplace/ListingDetailSheet";
 import ProduceCardSkeleton from "@/components/marketplace/ProduceCardSkeleton";
-import { MarketMap } from "@/components/marketplace/MarketMap";
+import { ProduceCard } from "@/components/marketplace/ProduceCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,23 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Leaf,
   Search,
-  MapPin,
   Package,
   Filter,
-  Loader2,
-  ShoppingCart,
   ArrowLeft,
-  Calendar,
-  MessageCircle,
-  Heart,
-  ChevronDown,
   X,
   SlidersHorizontal,
   Star,
-  ShieldCheck as ShieldIcon,
-  Store,
+  Loader2,
 } from "lucide-react";
 
 const EMOJI_MAP: Record<string, string> = {
@@ -58,27 +48,41 @@ const EMOJI_MAP: Record<string, string> = {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+// Lazy Load heavy components
+const MarketMap = lazy(() => import("@/components/marketplace/MarketMap").then(m => ({ default: m.MarketMap })));
+const ListingDetailSheet = lazy(() => import("@/components/marketplace/ListingDetailSheet"));
+
 const Marketplace = () => {
   const { user, userRole } = useAuth();
   const { addItem } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
   
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [minRating, setMinRating] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [chatReceiver, setChatReceiver] = useState<{ id: string; name: string } | null>(null);
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const [viewType, setViewType] = useState<"produce" | "shops">("produce");
 
-  const { listings, loading, categories, refetch } = useMarketplace({
+  const { listings, loading, categories, hasMore, loadMore, refetch } = useMarketplace({
     category: selectedCategory,
     search: debouncedSearch,
   });
@@ -94,18 +98,29 @@ const Marketplace = () => {
     return Array.from(locs);
   }, [listings]);
 
-  // Client-side filtering for location and price (as the hook might only do basic cat/search)
+  // Client-side filtering and sorting
   const filteredListings = useMemo(() => {
-    return listings.filter(l => {
+    let result = listings.filter(l => {
       const matchesPrice = l.price_per_unit >= priceRange[0] && l.price_per_unit <= priceRange[1];
       const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(l.farmer_location || "");
-      return matchesPrice && matchesLocation;
+      const matchesRating = minRating === null || (l.rating || 0) >= minRating;
+      return matchesPrice && matchesLocation && matchesRating;
     });
-  }, [listings, priceRange, selectedLocations]);
+
+    // Sorting
+    if (sortBy === "price-low") {
+      result.sort((a, b) => a.price_per_unit - b.price_per_unit);
+    } else if (sortBy === "price-high") {
+      result.sort((a, b) => b.price_per_unit - a.price_per_unit);
+    } else {
+      result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+
+    return result;
+  }, [listings, priceRange, selectedLocations, minRating, sortBy]);
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    setDebouncedSearch(value);
   };
 
   const handleLocationToggle = (loc: string) => {
@@ -225,11 +240,12 @@ const Marketplace = () => {
                     {[4, 3, 2, 1].map((star) => (
                       <Button
                         key={star}
-                        variant="outline"
+                        variant={minRating === star ? "default" : "outline"}
                         size="sm"
-                        className={`flex-1 gap-1 rounded-lg ${star === 4 ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : ''}`}
+                        className={`flex-1 gap-1 rounded-lg ${minRating === star ? 'shadow-md font-bold' : ''}`}
+                        onClick={() => setMinRating(minRating === star ? null : star)}
                       >
-                        {star}<Star className="w-3 h-3 fill-current" />
+                        {star}<Star className={`w-3 h-3 ${minRating === star ? 'fill-current' : ''}`} />
                       </Button>
                     ))}
                   </div>
@@ -273,15 +289,17 @@ const Marketplace = () => {
             </div>
 
             {/* Market Map Section */}
-            {!loading && listings.length > 0 && (
-              <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                <MarketMap 
-                  listings={listings} 
-                  onLocationSelect={handleLocationToggle}
-                  selectedLocations={selectedLocations}
-                />
-              </div>
-            )}
+            <Suspense fallback={<div className="h-64 bg-muted animate-pulse rounded-2xl" />}>
+              {!loading && listings.length > 0 && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                  <MarketMap 
+                    listings={listings} 
+                    onLocationSelect={handleLocationToggle}
+                    selectedLocations={selectedLocations}
+                  />
+                </div>
+              )}
+            </Suspense>
 
             {/* Active Filter Badges */}
             {(selectedCategory !== "All" || selectedLocations.length > 0) && (
@@ -341,7 +359,7 @@ const Marketplace = () => {
                   <p className="text-sm font-medium text-muted-foreground">
                     Showing <span className="text-foreground font-bold">{filteredListings.length}</span> results
                   </p>
-                  <Select defaultValue="newest">
+                  <Select defaultValue="newest" onValueChange={setSortBy}>
                     <SelectTrigger className="w-[140px] h-9 text-xs border-none bg-transparent font-bold">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
@@ -367,22 +385,45 @@ const Marketplace = () => {
                     />
                   ))}
                 </div>
+
+                {hasMore && (
+                  <div className="flex justify-center pt-8 pb-12">
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="rounded-xl px-12 border-primary/20 text-primary hover:bg-primary/5 font-bold"
+                      onClick={loadMore}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        "Load More Produce"
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </main>
 
-      <ListingDetailSheet 
-        listing={selectedListing}
-        open={detailSheetOpen}
-        onOpenChange={setDetailSheetOpen}
-        onOrder={handleOrderClick}
-        onAddToCart={handleAddToCart}
-        onMessage={handleMessageClick}
-        isFavorite={selectedListing ? isFavorite(selectedListing.id) : false}
-        onToggleFavorite={() => selectedListing && toggleFavorite(selectedListing.id)}
-      />
+      <Suspense fallback={null}>
+        <ListingDetailSheet 
+          listing={selectedListing}
+          open={detailSheetOpen}
+          onOpenChange={setDetailSheetOpen}
+          onOrder={handleOrderClick}
+          onAddToCart={handleAddToCart}
+          onMessage={handleMessageClick}
+          isFavorite={selectedListing ? isFavorite(selectedListing.id) : false}
+          onToggleFavorite={() => selectedListing && toggleFavorite(selectedListing.id)}
+        />
+      </Suspense>
 
       {/* Mobile Filters Drawer - Placeholder logic */}
       {showMobileFilters && (
@@ -412,7 +453,43 @@ const Marketplace = () => {
                   ))}
                 </div>
               </div>
-              {/* ... more mobile filters ... */}
+
+              {/* Price Filter Mobile */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-sm uppercase text-muted-foreground">Price Range</h3>
+                <div className="px-2 pt-2">
+                  <Slider
+                    defaultValue={[0, 10000]}
+                    max={10000}
+                    step={100}
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    className="mb-4"
+                  />
+                  <div className="flex items-center justify-between text-xs font-bold text-primary">
+                    <span>Ksh {priceRange[0]}</span>
+                    <span>Ksh {priceRange[1]}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rating Filter Mobile */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-sm uppercase text-muted-foreground">Minimum Rating</h3>
+                <div className="flex items-center gap-2">
+                  {[4, 3, 2, 1].map((star) => (
+                    <Button
+                      key={star}
+                      variant={minRating === star ? "default" : "outline"}
+                      size="sm"
+                      className="flex-1 gap-1 rounded-xl h-11"
+                      onClick={() => setMinRating(minRating === star ? null : star)}
+                    >
+                      {star}<Star className={`w-3 h-3 ${minRating === star ? 'fill-current' : ''}`} />
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="p-4 border-t bg-muted/20">
               <Button className="w-full h-12 rounded-xl font-bold" onClick={() => setShowMobileFilters(false)}>
@@ -442,147 +519,6 @@ const Marketplace = () => {
       )}
       <Footer />
     </div>
-  );
-};
-
-interface ProduceCardProps {
-  listing: MarketplaceListing;
-  onOrder: (listing: MarketplaceListing) => void;
-  onAddToCart: (listing: MarketplaceListing) => void;
-  onMessage: (listing: MarketplaceListing) => void;
-  onCardClick: () => void;
-  isFavorite: boolean;
-  onToggleFavorite: () => void;
-}
-
-const ProduceCard = ({ listing, onOrder, onAddToCart, onMessage, onCardClick, isFavorite, onToggleFavorite }: ProduceCardProps) => {
-  const categoryEmoji = EMOJI_MAP[listing.category] || "📦";
-  
-  const displayRating = listing.rating || "New";
-  const displayReviewCount = listing.review_count || 0;
-
-  return (
-    <Card 
-      className="overflow-hidden border-border/40 bg-background/60 backdrop-blur-sm hover:border-primary/30 hover:shadow-elevated transition-all duration-300 group rounded-2xl flex flex-col h-full cursor-pointer"
-      onClick={onCardClick}
-    >
-      <div className="relative h-52 bg-muted overflow-hidden">
-        {listing.image_url ? (
-          <img
-            src={listing.image_url}
-            alt={listing.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl bg-gradient-to-br from-muted to-muted/50">
-            {categoryEmoji}
-          </div>
-        )}
-        
-        {/* Badges Overlay */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          <Badge className="bg-background/90 text-foreground backdrop-blur-md border-none shadow-sm font-bold px-3">
-            {listing.category}
-          </Badge>
-          {listing.quantity_available < 10 && (
-            <Badge variant="destructive" className="font-bold shadow-sm animate-pulse">
-              Low Stock
-            </Badge>
-          )}
-          {listing.is_bulk_available && (
-            <Badge className="bg-primary text-primary-foreground border-none shadow-sm font-bold flex items-center gap-1">
-              <Scale className="w-3 h-3" />
-              Bulk Available
-            </Badge>
-          )}
-        </div>
-        
-        {/* Action Buttons Overlay */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 translate-x-12 group-hover:translate-x-0 transition-transform duration-300">
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-10 w-10 rounded-xl bg-background/90 backdrop-blur-md shadow-soft hover:bg-primary hover:text-white transition-all"
-            onClick={() => onMessage(listing)}
-            title="Chat with Farmer"
-          >
-            <MessageCircle className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className={`h-10 w-10 rounded-xl bg-background/90 backdrop-blur-md shadow-soft transition-all hover:scale-110 ${isFavorite ? 'text-red-500' : 'text-muted-foreground'}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite();
-            }}
-            title="Add to Favorites"
-          >
-            <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
-          </Button>
-        </div>
-
-        {/* Price Tag Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-display font-bold text-white tracking-tight">
-              Ksh {listing.price_per_unit}
-            </span>
-            <span className="text-xs text-white/80 font-medium">/{listing.unit}</span>
-          </div>
-        </div>
-      </div>
-
-      <CardContent className="p-5 flex flex-col flex-1">
-        <div className="flex justify-between items-start mb-2 gap-2">
-          <h3 className="font-display font-bold text-lg text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-            {listing.name}
-          </h3>
-          <div className="flex items-center gap-1 bg-yellow-400/10 text-yellow-600 px-2 py-0.5 rounded-lg text-[10px] font-bold">
-            <Star className="w-3 h-3 fill-current" />
-            {displayRating}
-            {displayReviewCount > 0 && <span className="text-muted-foreground ml-0.5">({displayReviewCount})</span>}
-          </div>
-        </div>
-        
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed min-h-[40px]">
-          {listing.description || `Premium quality ${listing.name.toLowerCase()} harvested fresh from the fields of ${listing.farmer_location}.`}
-        </p>
-
-        <div className="grid grid-cols-2 gap-3 mb-5 py-3 border-y border-border/40 mt-auto">
-          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center relative">
-              <Leaf className="w-3 h-3 text-primary" />
-              <ShieldIcon className="absolute -bottom-1 -right-1 w-2.5 h-2.5 text-blue-500 bg-background rounded-full" />
-            </div>
-            <span className="truncate">{listing.farmer_name}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center">
-              <MapPin className="w-3 h-3 text-secondary" />
-            </div>
-            <span className="truncate">{listing.farmer_location || "Kenya"}</span>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            className="flex-1 rounded-xl h-11 border-border/60 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all font-bold group/btn"
-            onClick={() => handleAddToCart(listing)}
-          >
-            <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
-            Cart
-          </Button>
-          <Button 
-            className="flex-1 rounded-xl h-11 shadow-soft font-bold transition-all hover:scale-105 active:scale-95" 
-            onClick={() => onOrder(listing)}
-          >
-            Buy Now
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 

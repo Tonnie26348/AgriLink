@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense, memo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MarketplaceListing, useMarketplace } from "@/hooks/useMarketplace";
@@ -20,19 +20,13 @@ import {
   Share2,
   Heart,
   TrendingUp,
-  Award
+  Award,
+  Clock
 } from "lucide-react";
-import ListingDetailSheet from "@/components/marketplace/ListingDetailSheet";
 import { toast } from "sonner";
 
-interface Profile {
-  id: string;
-  user_id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  location: string | null;
-  role: string;
-}
+// Lazy Load
+const ListingDetailSheet = lazy(() => import("@/components/marketplace/ListingDetailSheet"));
 
 interface Profile {
   id: string;
@@ -232,22 +226,24 @@ const FarmerStorefront = () => {
         </div>
       </main>
 
-      <ListingDetailSheet 
-        listing={selectedListing}
-        open={detailSheetOpen}
-        onOpenChange={setDetailSheetOpen}
-        onOrder={() => {}} // Placeholder
-        onAddToCart={() => {}} // Placeholder
-        onMessage={() => {}} // Placeholder
-        isFavorite={false}
-        onToggleFavorite={() => {}}
-      />
+      <Suspense fallback={null}>
+        <ListingDetailSheet 
+          listing={selectedListing}
+          open={detailSheetOpen}
+          onOpenChange={setDetailSheetOpen}
+          onOrder={() => {}} // Placeholder
+          onAddToCart={() => {}} // Placeholder
+          onMessage={() => {}} // Placeholder
+          isFavorite={false}
+          onToggleFavorite={() => {}}
+        />
+      </Suspense>
       <Footer />
     </div>
   );
 };
 
-const ListingCard = ({ listing, onClick }: { listing: MarketplaceListing, onClick: () => void }) => {
+const ListingCard = memo(({ listing, onClick }: { listing: MarketplaceListing, onClick: () => void }) => {
   return (
     <Card 
       className="overflow-hidden border-border/40 bg-background/60 backdrop-blur-sm hover:border-primary/30 hover:shadow-elevated transition-all duration-300 group rounded-3xl cursor-pointer"
@@ -258,6 +254,7 @@ const ListingCard = ({ listing, onClick }: { listing: MarketplaceListing, onClic
           src={listing.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1974&auto=format&fit=crop"} 
           alt={listing.name} 
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
         />
         <div className="absolute top-4 left-4">
           <Badge className="bg-background/90 text-foreground backdrop-blur-md border-none shadow-sm font-bold">
@@ -278,6 +275,4 @@ const ListingCard = ({ listing, onClick }: { listing: MarketplaceListing, onClic
       </CardContent>
     </Card>
   );
-};
-
-export default FarmerStorefront;
+});

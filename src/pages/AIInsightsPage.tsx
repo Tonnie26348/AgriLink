@@ -85,6 +85,38 @@ const AIInsightsPage = () => {
     setCheckingPrice(true);
     setSpecificGuidance(null);
     try {
+      // 1. Try Local FastAPI AI Service
+      try {
+        const localResponse = await fetch("http://localhost:8000/predict-price", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            crop_type: query,
+            location: "Kenya",
+            historical_prices: [100, 105, 110], // Placeholder historical data
+            seasonal_factor: 1.0,
+            demand_level: "Medium",
+            supply_level: "Medium"
+          })
+        });
+
+        if (localResponse.ok) {
+          const data = await localResponse.json();
+          setSpecificGuidance({
+            suggestedPriceMin: data.confidence_interval[0],
+            suggestedPriceMax: data.confidence_interval[1],
+            demandLevel: "Medium",
+            reasoning: data.recommendation,
+            pricePosition: data.trend
+          });
+          setCheckingPrice(false);
+          return;
+        }
+      } catch (e) {
+        console.log("Local AI service not available for specific check, falling back");
+      }
+
+      // 2. Fallback to Supabase Edge Function
       const { data, error } = await supabase.functions.invoke("price-insights", {
         body: { 
           mode: "specific",

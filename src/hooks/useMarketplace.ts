@@ -27,37 +27,35 @@ export interface MarketplaceListing {
 interface UseMarketplaceOptions {
   category?: string;
   search?: string;
-}
-
-interface MarketplaceItemResponse extends MarketplaceListing {
-  profiles: {
-    full_name: string | null;
-    location: string | null;
-  } | null;
+  limit?: number;
+  offset?: number;
 }
 
 export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
   const { toast } = useToast();
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
 
-  const fetchListings = useCallback(async () => {
+  const [offset, setOffset] = useState(0);
+  const limit = options.limit || 12;
+
+  const fetchListings = useCallback(async (currentOffset: number, isLoadMore = false) => {
     try {
-      setLoading(true);
+      if (!isLoadMore) {
+        setLoading(true);
+        setOffset(0);
+      }
       
+      // Use the optimized view
       let query = supabase
-        .from("produce_listings")
-        .select(`
-          *,
-          profiles!produce_listings_farmer_id_fkey (
-            full_name,
-            location
-          )
-        `)
+        .from("marketplace_view" as any)
+        .select("*")
         .eq("is_available", true)
         .gt("quantity_available", 0)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(currentOffset, currentOffset + limit - 1);
 
       if (options.category && options.category !== "All") {
         query = query.eq("category", options.category);
@@ -69,67 +67,40 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
 
       const { data, error } = await query;
 
-      if (error) {
-        console.error("Supabase error fetching listings:", error);
-        throw error;
+      if (error) throw error;
+
+      const formattedListings = (data || []).map((item: any) => ({
+        ...item,
+        farmer_name: item.farmer_name || "Local Farmer",
+        farmer_location: item.farmer_location || "Kenya",
+      }));
+
+      if (isLoadMore) {
+        setListings(prev => [...prev, ...formattedListings]);
+      } else {
+        setListings(formattedListings);
       }
 
-      // Fetch ratings for these listings
-      const listingIds = (data || []).map(l => l.id);
-      
-      interface ReviewData {
-        listing_id: string;
-        rating: number;
-      }
-      let reviewsData: ReviewData[] = [];
-      
-      if (listingIds.length > 0) {
-        const { data: revs, error: revError } = await supabase
-          .from("reviews")
-          .select("listing_id, rating")
-          .in("listing_id", listingIds);
-        
-        if (!revError) {
-          reviewsData = (revs || []) as unknown as ReviewData[];
-        } else {
-          console.warn("Could not fetch reviews:", revError.message);
-        }
-      }
-
-      // Aggregate ratings
-      const ratingMap: Record<string, { total: number, count: number }> = {};
-      reviewsData?.forEach(rev => {
-        if (!ratingMap[rev.listing_id]) {
-          ratingMap[rev.listing_id] = { total: 0, count: 0 };
-        }
-        ratingMap[rev.listing_id].total += rev.rating;
-        ratingMap[rev.listing_id].count += 1;
-      });
-
-      const formattedListings = (data as unknown as MarketplaceItemResponse[] || []).map((item) => {
-        const ratingStats = ratingMap[item.id];
-        return {
-          ...item,
-          farmer_name: item.profiles?.full_name || "Local Farmer",
-          farmer_location: item.profiles?.location || "Kenya",
-          rating: ratingStats ? Number((ratingStats.total / ratingStats.count).toFixed(1)) : undefined,
-          review_count: ratingStats ? ratingStats.count : 0,
-        };
-      });
-      setListings(formattedListings);
+      setHasMore(formattedListings.length === limit);
     } catch (error: unknown) {
       console.error("Error fetching marketplace listings:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-      const errorCode = (error && typeof error === 'object' && 'code' in error) ? String((error as Record<string, unknown>).code) : "No code";
       toast({
         title: "Error fetching listings",
-        description: `${errorMessage} (Code: ${errorCode})`,
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [options.category, options.search, toast]);
+  }, [options.category, options.search, limit, toast]);
+
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      const nextOffset = offset + limit;
+      setOffset(nextOffset);
+      fetchListings(nextOffset, true);
+    }
+  }, [loading, hasMore, offset, limit, fetchListings]);
 
   const fetchCategories = async () => {
     try {
@@ -151,7 +122,7 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
   };
 
   useEffect(() => {
-    fetchListings();
+    fetchListings(0, false);
 
     // Subscribe to real-time changes
     const channel = supabase
@@ -165,7 +136,7 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
         },
         () => {
           console.log("Real-time marketplace update received");
-          fetchListings();
+          fetchListings(0, false);
         }
       )
       .subscribe();
@@ -173,7 +144,7 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchListings]);
+  }, [options.category, options.search, fetchListings]);
 
   useEffect(() => {
     fetchCategories();
@@ -183,6 +154,8 @@ export const useMarketplace = (options: UseMarketplaceOptions = {}) => {
     listings,
     loading,
     categories,
-    refetch: fetchListings,
+    hasMore,
+    loadMore,
+    refetch: () => fetchListings(0, false),
   };
 };
