@@ -42,6 +42,16 @@ const Login = () => {
 
     // Role is now updated by signIn in AuthContext.
     // We need to fetch the role one last time to be absolutely sure.
+    if (!data?.user) {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "User session could not be established.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).maybeSingle();
     const role = roleData?.role;
 
