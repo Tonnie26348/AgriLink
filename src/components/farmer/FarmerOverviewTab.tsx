@@ -132,39 +132,13 @@ export const FarmerOverviewTab = ({
               </div>
             </CardContent>
           </Card>
+
+          {/* Weather Widget moved here */}
+          <WeatherWidget location={profile?.location || "Nakuru, Kenya"} />
         </div>
 
         <div className="space-y-6">
-          {/* Weather Widget */}
-          <WeatherWidget location={profile?.location || "Nakuru, Kenya"} />
-
-          {/* Low Stock Alerts */}
-          {listings.filter(l => l.quantity_available <= 10).length > 0 && (
-            <Card className="border-amber-200 bg-amber-50/30 shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-bold text-amber-800 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4" />
-                  Low Stock Alerts
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {listings
-                  .filter(l => l.quantity_available <= 10)
-                  .map(l => (
-                    <div key={l.id} className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-amber-100 shadow-sm">
-                      <div>
-                        <p className="text-xs font-bold text-foreground">{l.name}</p>
-                        <p className="text-[10px] text-amber-600 font-medium">{l.quantity_available} {l.unit} remaining</p>
-                      </div>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-amber-600 hover:bg-amber-100" onClick={() => onEdit(l)}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-              </CardContent>
-            </Card>
-          )}
-
+          {/* AI Price Guidance Card moved to top */}
           <Card className="shadow-soft border-border/50 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
               <Sparkles className="w-12 h-12 text-primary" />
@@ -202,6 +176,33 @@ export const FarmerOverviewTab = ({
               )}
             </CardContent>
           </Card>
+
+          {/* Low Stock Alerts */}
+          {listings.filter(l => l.quantity_available <= 10).length > 0 && (
+            <Card className="border-amber-200 bg-amber-50/30 shadow-none">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-bold text-amber-800 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Low Stock Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {listings
+                  .filter(l => l.quantity_available <= 10)
+                  .map(l => (
+                    <div key={l.id} className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-amber-100 shadow-sm">
+                      <div>
+                        <p className="text-xs font-bold text-foreground">{l.name}</p>
+                        <p className="text-[10px] text-amber-600 font-medium">{l.quantity_available} {l.unit} remaining</p>
+                      </div>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-amber-600 hover:bg-amber-100" onClick={() => onEdit(l)}>
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="shadow-soft border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
             <CardHeader className="pb-3">
