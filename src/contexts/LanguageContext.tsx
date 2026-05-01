@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Language, LanguageContext } from "./language-context-definition";
 
+export { LanguageContext };
+
 const translations: Record<Language, Record<string, string>> = {
   en: {
     "nav.home": "Home",
