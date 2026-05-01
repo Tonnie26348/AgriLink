@@ -177,13 +177,13 @@ const DashboardLayout = ({ children, navItems, role }: DashboardLayoutProps) => 
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
-          <div className="container mx-auto px-4 md:px-8 py-8 animate-fade-in">
+        <main className="flex-1 overflow-y-auto flex flex-col no-scrollbar scroll-smooth">
+          <div className="flex-1 container mx-auto px-4 md:px-8 py-8 animate-fade-in">
             {children}
           </div>
           
           {/* Simple Dashboard Footer */}
-          <footer className="py-8 border-t border-border/10 mt-auto bg-background/40">
+          <footer className="py-8 border-t border-border/10 mt-auto bg-background/40 shrink-0">
             <div className="container mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-4">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                 © {new Date().getFullYear()} AgriLink {role} Portal
