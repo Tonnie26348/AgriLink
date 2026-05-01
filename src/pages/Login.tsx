@@ -7,6 +7,7 @@ import { Leaf, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context-definition";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -27,7 +28,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error, data } = await signIn(email, password);
 
     if (error) {
       toast({
@@ -35,13 +36,22 @@ const Login = () => {
         title: "Login failed",
         description: error.message,
       });
-    } else {
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
+      setIsLoading(false);
+      return;
     }
 
+    // Role is now updated by signIn in AuthContext.
+    // We need to fetch the role one last time to be absolutely sure.
+    const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).maybeSingle();
+    const role = roleData?.role;
+
+    toast({
+      title: "Welcome back!",
+      description: "You have successfully logged in.",
+    });
+
+    const redirectPath = role === "farmer" ? "/farmer/dashboard" : "/buyer/dashboard";
+    navigate(redirectPath, { replace: true });
     setIsLoading(false);
   };
 
